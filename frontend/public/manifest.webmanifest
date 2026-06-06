@@ -1,0 +1,13 @@
+{
+  "name": "Urban IntelliFlow — Khon Kaen",
+  "short_name": "IntelliFlow",
+  "description": "Adaptive traffic-signal dashboard for Khon Kaen — citizen + officer.",
+  "lang": "th",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#103029",
+  "theme_color": "#1B4D3E",
+  "icons": [
+    { "src": "/logo.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

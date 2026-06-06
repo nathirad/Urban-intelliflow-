@@ -1,0 +1,4 @@
+ultralytics>=8.3.0      # YOLO26 (yolo26n.pt / yolo26m.pt) + ByteTrack tracking mode
+opencv-python>=4.9.0    # RTSP / video frame capture
+paho-mqtt>=2.0.0        # publish metadata to the city cloud
+numpy>=1.26.0

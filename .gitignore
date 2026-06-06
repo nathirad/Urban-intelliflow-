@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+*.pt              # YOLO weights (download on first use)
+!yolo26*.yaml     # keep architecture configs
+
+# Node
+node_modules/
+dist/
+
+# Env / secrets
+.env
+*.key
+
+# Data
+*.mp4
+*.mov
+data/
+mnt/
+
+# OS
+.DS_Store
+
+# Local agent/IDE tooling
+.claude/

@@ -1,0 +1,9 @@
+fastapi>=0.110.0
+uvicorn[standard]>=0.29.0
+pydantic>=2.6.0
+google-generativeai>=0.5.0   # Gemini 1.5 Flash (VLLM) for incident narration + complaint classification
+# Optional in production:
+# confluent-kafka>=2.3.0     # Kafka consumer
+# pymongo>=4.6.0             # MongoDB data lake
+# psycopg2-binary>=2.9.0     # PostgreSQL + PostGIS
+# networkx>=3.2              # route graph (A* / Dijkstra) before moving to PostGIS pgrouting
