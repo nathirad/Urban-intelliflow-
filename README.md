@@ -34,14 +34,17 @@ full demo script + pitch talking points.
 ./start-demo.sh        # backend :8000 + frontend :5173, then Ctrl-C to stop
 ```
 
-Open **http://localhost:5173**. The dashboard is **live immediately** — `backend/main.py`
-runs the Orchestrator Agent's traffic simulation as a background task, so every number
-is produced by the real agents. No cameras, Kafka, or database required.
+Open **http://localhost:5173** → **log in** (demo: `officer@khonkaen.go.th` / `demo1234`,
+or register). The dashboard is **live immediately** — `backend/main.py` runs the
+Orchestrator Agent's traffic simulation as a background task, so every number is produced
+by the real agents. No cameras, Kafka, or database required.
 
-The dashboard has four tabs: **Overview** (real Khon Kaen map + Business Value),
-**Analytics & Incidents** (charts + Gemini-narrated incident feed), **Operations**
-(per-junction timing + Auto/Manual PLC toggle), and **Citizen** (route guidance +
-complaint classification).
+Features: **Login/Register** with role-gated nav (citizen / officer / admin),
+**Light + Dark mode** (top-right toggle, persisted), and four sections — **Overview**
+(real Khon Kaen map + Business Value), **Analytics & Incidents** (charts + Gemini-narrated
+incident feed), **Operations** (per-junction timing + Auto/Manual PLC toggle), and
+**Citizen** (route guidance + complaint classification). Demo accounts & full script in
+**[`DEMO.md`](DEMO.md)**.
 
 ## Quickstart — run pieces individually
 

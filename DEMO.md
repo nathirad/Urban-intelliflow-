@@ -16,10 +16,23 @@ cd Urban-intelliflow-
 ./start-demo.sh          # starts backend (8000) + frontend (5173)
 ```
 
-Open **http://localhost:5173** → the dashboard is already **LIVE** (green pulse, top-right).
+Open **http://localhost:5173** → you land on the **login page**. Use a demo account
+(or the "กรอกให้อัตโนมัติ" button), then the dashboard is **LIVE** (green pulse).
 No cameras, no Kafka, no database needed — `main.py` runs the Orchestrator Agent's
 traffic simulation as a background task, so every number on screen is produced by the
 real agents. Stop everything with `Ctrl-C`.
+
+### 🔑 Demo accounts (password `demo1234` for all)
+
+| Email | Role | Sees |
+|---|---|---|
+| `admin@khonkaen.go.th` | ผู้ดูแลระบบ (admin) | everything |
+| `officer@khonkaen.go.th` | เจ้าหน้าที่จราจร (officer) | Overview, Analytics, Operations, Citizen |
+| `citizen@khonkaen.go.th` | ประชาชน (citizen) | Overview + Citizen services only |
+
+You can also **register** a new account (role-aware) on the same screen. The nav is
+**role-gated** — citizens don't see the control room. Top-right ☀️/🌙 toggles
+**Light / Dark mode** (persisted).
 
 ---
 

@@ -92,8 +92,8 @@ export default function BusinessValue({ data }) {
           <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => `${Math.round(v / 1000)}k`} />
           <Tooltip formatter={(v) => `${fmt(v)} ฿`} labelFormatter={(m) => `เดือนที่ ${m}`} />
           <ReferenceLine y={series[0]?.cost} stroke={theme.silver} strokeDasharray="4 4"
-            label={{ value: "ต้นทุนติดตั้ง", fontSize: 10, fill: theme.ink }} />
-          <Line type="monotone" dataKey="benefit" stroke={theme.green} strokeWidth={2.5} dot={false} name="ผลตอบแทนสะสม" />
+            label={{ value: "ต้นทุนติดตั้ง", fontSize: 10, fill: theme.gold }} />
+          <Line type="monotone" dataKey="benefit" stroke={theme.flow} strokeWidth={2.5} dot={false} name="ผลตอบแทนสะสม" />
         </LineChart>
       </ResponsiveContainer>
 

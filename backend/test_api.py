@@ -77,3 +77,27 @@ def test_route_and_complaint():
         comp = c.post("/api/complaint", json={"text": "มีน้ำท่วม flooding ที่ถนน"}).json()
         assert comp["category"] == "flooding"
         assert comp["priority"] == "high"
+
+
+def test_auth_flow():
+    with _client() as c:
+        # seed account login
+        r = c.post("/api/auth/login", json={"email": "officer@khonkaen.go.th", "password": "demo1234"})
+        assert r.status_code == 200
+        body = r.json()
+        assert body["token"] and body["user"]["role"] == "officer"
+        assert body["user"]["role_label"] == "เจ้าหน้าที่จราจร"
+
+        # token works on /me
+        me = c.get("/api/auth/me", headers={"Authorization": f"Bearer {body['token']}"})
+        assert me.status_code == 200 and me.json()["email"] == "officer@khonkaen.go.th"
+
+        # bad password rejected, no token to /me rejected
+        assert c.post("/api/auth/login", json={"email": "officer@khonkaen.go.th", "password": "nope"}).status_code == 401
+        assert c.get("/api/auth/me").status_code == 401
+
+        # register new + duplicate guard + weak-password guard
+        reg = c.post("/api/auth/register", json={"email": "fresh@x.com", "name": "ใหม่", "password": "secret1", "role": "citizen"})
+        assert reg.status_code == 200 and reg.json()["user"]["role"] == "citizen"
+        assert c.post("/api/auth/register", json={"email": "fresh@x.com", "password": "secret1"}).status_code == 409
+        assert c.post("/api/auth/register", json={"email": "bad", "password": "x"}).status_code == 400

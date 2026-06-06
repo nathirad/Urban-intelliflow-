@@ -2,8 +2,15 @@
 // In dev, Vite proxies /api → http://localhost:8000 (see vite.config.js).
 import { useEffect, useRef, useState } from "react";
 
+export const TOKEN_KEY = "uif_token";
+
+function authHeaders() {
+  const t = localStorage.getItem(TOKEN_KEY);
+  return t ? { Authorization: `Bearer ${t}` } : {};
+}
+
 export async function getJSON(path) {
-  const r = await fetch(path);
+  const r = await fetch(path, { headers: { ...authHeaders() } });
   if (!r.ok) throw new Error(`${path} → ${r.status}`);
   return r.json();
 }
@@ -11,10 +18,14 @@ export async function getJSON(path) {
 export async function postJSON(path, body) {
   const r = await fetch(path, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...authHeaders() },
     body: JSON.stringify(body),
   });
-  if (!r.ok) throw new Error(`${path} → ${r.status}`);
+  if (!r.ok) {
+    let detail = `${r.status}`;
+    try { detail = (await r.json()).detail || detail; } catch { /* ignore */ }
+    throw new Error(detail);
+  }
   return r.json();
 }
 

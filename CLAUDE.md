@@ -108,6 +108,10 @@ background task on startup, so a single `uvicorn main:app` serves a fully live d
 Disable the sim with `INTELLIFLOW_SIM=0`. Endpoints:
 
 ```
+POST /api/auth/register           {email,name?,password,role} → {token,user}
+POST /api/auth/login              {email,password} → {token,user}
+GET  /api/auth/me                 (Bearer token) → current user
+POST /api/auth/logout             invalidate token
 GET  /api/summary                 KPI strip (active junctions, avg congestion, auto/manual, incidents, uptime)
 GET  /api/junctions               live status of every junction (drives map + control)
 GET  /api/junctions/{id}          single junction + history

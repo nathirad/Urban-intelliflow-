@@ -18,12 +18,13 @@ import asyncio
 import os
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 import orchestrator
 from agents import business_value, feedback_classifier, route_guidance
+from auth import STORE
 from state import STATE
 
 # Disable the background sim with INTELLIFLOW_SIM=0 (e.g. when wiring real Kafka).
@@ -55,6 +56,57 @@ app.add_middleware(
 @app.get("/health")
 def health():
     return {"status": "ok", "service": "urban-intelliflow", "version": app.version}
+
+
+# --- Auth -------------------------------------------------------------------
+class RegisterBody(BaseModel):
+    email: str
+    name: str | None = None
+    password: str
+    role: str = "citizen"
+
+
+class LoginBody(BaseModel):
+    email: str
+    password: str
+
+
+@app.post("/api/auth/register")
+def register(body: RegisterBody):
+    if "@" not in body.email or len(body.password) < 6:
+        raise HTTPException(400, "อีเมลไม่ถูกต้อง หรือรหัสผ่านสั้นเกินไป (อย่างน้อย 6 ตัว)")
+    try:
+        return STORE.register(body.email, body.name or "", body.password, body.role)
+    except ValueError as e:
+        raise HTTPException(409, str(e))
+
+
+@app.post("/api/auth/login")
+def login(body: LoginBody):
+    try:
+        return STORE.login(body.email, body.password)
+    except ValueError as e:
+        raise HTTPException(401, str(e))
+
+
+def _token(authorization: str | None) -> str | None:
+    if authorization and authorization.lower().startswith("bearer "):
+        return authorization.split(" ", 1)[1]
+    return None
+
+
+@app.get("/api/auth/me")
+def me(authorization: str | None = Header(default=None)):
+    user = STORE.user_for_token(_token(authorization))
+    if not user:
+        raise HTTPException(401, "ไม่ได้เข้าสู่ระบบ")
+    return user
+
+
+@app.post("/api/auth/logout")
+def logout(authorization: str | None = Header(default=None)):
+    STORE.logout(_token(authorization))
+    return {"ok": True}
 
 
 @app.get("/api/summary")

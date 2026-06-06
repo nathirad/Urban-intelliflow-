@@ -36,7 +36,7 @@ export default function TrafficAnalytics() {
           <XAxis dataKey="hour" tick={{ fontSize: 10 }} interval={3} />
           <YAxis tick={{ fontSize: 10 }} tickFormatter={(v) => `${v}%`} domain={[0, 100]} />
           <Tooltip formatter={(v) => `${v}%`} />
-          <Area type="monotone" dataKey="congestion" stroke={theme.green} strokeWidth={2} fill="url(#cg)" />
+          <Area type="monotone" dataKey="congestion" stroke={theme.flow} strokeWidth={2} fill="url(#cg)" />
         </AreaChart>
       </ResponsiveContainer>
 
