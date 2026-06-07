@@ -29,6 +29,25 @@ JUNCTIONS_SEED = [
 
 ZONE_OF = {j["id"]: j["zone"] for j in JUNCTIONS_SEED}
 
+# Edge-node connection lifecycle (honest: hardware is rolled out gradually).
+# Demo reality: a 2-junction pilot is live, 1 is mid-install, 2 are not deployed yet.
+NODE_STAGE = {
+    "MITR-01": "online",      # pilot — fully deployed + streaming
+    "SRIC-01": "online",      # pilot — fully deployed + streaming
+    "MITR-02": "connecting",  # hardware on site, finishing camera handshake
+    "PRAC-01": "planned",     # scheduled, hardware not installed yet
+    "LAKE-01": "planned",     # scheduled, hardware not installed yet
+}
+CONNECT_STEPS = [
+    "ติดตั้งฮาร์ดแวร์ (Jetson + กล้อง) ที่ตู้ควบคุม",
+    "จ่ายไฟ + เชื่อมเครือข่าย (fiber/4G/LoRa)",
+    "Jetson ส่ง MQTT heartbeat เข้าศูนย์",
+    "จับมือ RTSP กับกล้อง CCTV (ตรวจสตรีม)",
+    "YOLO26 ตรวจจับเฟรมแรก (calibrate)",
+    "สตรีม metadata → ออนไลน์เต็มรูปแบบ",
+]
+STAGE_STEPS_DONE = {"online": 6, "connecting": 3, "planned": 0}
+
 INCIDENT_CAP = 30
 HISTORY_LEN = 120  # ~last N windows kept per junction for sparkline/analytics
 
@@ -69,18 +88,26 @@ class _LiveState:
         self.complaints_resolved = 0
 
         # Edge nodes (Jetson + cameras) per junction — for the police/ops monitor.
+        # Honest provisioning lifecycle: NOT all hardware is deployed yet. Stage is
+        # one of: "online" (live), "connecting" (handshaking), "planned" (no hardware).
         self.nodes: dict[str, dict] = {}
         for j in JUNCTIONS_SEED:
             orin = j["zone"] == "A"
+            stage = NODE_STAGE.get(j["id"], "planned")
+            done = STAGE_STEPS_DONE[stage]
+            cam_status = {"online": "online", "connecting": "linking", "planned": "offline"}[stage]
             self.nodes[j["id"]] = {
                 "node_id": j["zone"], "junction_id": j["id"], "name": j["name"],
                 "jetson": "Jetson Orin" if orin else "Jetson Nano",
                 "model": "yolo26m" if orin else "yolo26n",
-                "status": "online", "fps": 0.0, "gpu_temp_c": 0.0,
-                "detections_today": 0, "uptime_pct": round(99.0 + 0.9 * (hash(j["id"]) % 10) / 10, 2),
+                "stage": stage, "status": stage,
+                "fps": 0.0, "gpu_temp_c": 0.0, "detections_today": 0,
+                "uptime_pct": round(99.0 + 0.9 * (hash(j["id"]) % 10) / 10, 2) if stage == "online" else 0.0,
+                "last_heartbeat": datetime.now(timezone.utc).isoformat() if stage != "planned" else None,
+                "steps": [{"label": s, "done": i < done} for i, s in enumerate(CONNECT_STEPS)],
                 "cameras": [
-                    {"id": f"cam-{j['id']}-1", "view": "ขาเข้าหลัก", "status": "online", "resolution": "4MP", "fps": 25},
-                    {"id": f"cam-{j['id']}-2", "view": "ขาออก/คนข้าม", "status": "online", "resolution": "4MP", "fps": 25},
+                    {"id": f"cam-{j['id']}-1", "view": "ขาเข้าหลัก", "status": cam_status, "resolution": "4MP", "fps": 25 if stage == "online" else 0},
+                    {"id": f"cam-{j['id']}-2", "view": "ขาออก/คนข้าม", "status": cam_status, "resolution": "4MP", "fps": 25 if stage == "online" else 0},
                 ],
             }
 
@@ -111,13 +138,15 @@ class _LiveState:
             acc[0] += event["congestion_score"]
             acc[1] += 1
 
-            # Edge node telemetry (Jetson health + cumulative detections)
+            # Edge node telemetry — only counts for junctions whose hardware is LIVE.
+            # "connecting"/"planned" nodes report no detections (honest provisioning).
             node = self.nodes.get(event["junction_id"])
-            if node:
+            if node and node["stage"] == "online":
                 node["detections_today"] += event["vehicle_count"]
                 load = event["congestion_score"]
                 node["fps"] = round(30 - 8 * load + (self.tick % 3) * 0.3, 1)
                 node["gpu_temp_c"] = round(46 + 16 * load + (self.tick % 5) * 0.4, 1)
+                node["last_heartbeat"] = event["timestamp"]
 
     def add_incident(self, incident: dict) -> None:
         with self._lock:
@@ -244,14 +273,33 @@ class _LiveState:
         with self._lock:
             nodes = list(self.nodes.values())
             cams = [c for n in nodes for c in n["cameras"]]
+            online = [n for n in nodes if n["stage"] == "online"]
             return {
                 "nodes_total": len(nodes),
-                "nodes_online": sum(1 for n in nodes if n["status"] == "online"),
+                "nodes_online": len(online),
+                "nodes_connecting": sum(1 for n in nodes if n["stage"] == "connecting"),
+                "nodes_planned": sum(1 for n in nodes if n["stage"] == "planned"),
                 "cameras_total": len(cams),
                 "cameras_online": sum(1 for c in cams if c["status"] == "online"),
                 "detections_today": sum(n["detections_today"] for n in nodes),
-                "avg_fps": round(sum(n["fps"] for n in nodes) / (len(nodes) or 1), 1),
+                "avg_fps": round(sum(n["fps"] for n in online) / (len(online) or 1), 1),
             }
+
+    def connect_node(self, jid: str) -> dict | None:
+        """Simulate completing the Jetson↔CCTV handshake for a node (demo action)."""
+        with self._lock:
+            n = self.nodes.get(jid)
+            if not n:
+                return None
+            n["stage"] = n["status"] = "online"
+            n["uptime_pct"] = 99.0
+            n["last_heartbeat"] = datetime.now(timezone.utc).isoformat()
+            for s in n["steps"]:
+                s["done"] = True
+            for c in n["cameras"]:
+                c["status"] = "online"
+                c["fps"] = 25
+            return dict(n)
 
     # -- User trips (PDPA: consented, anonymized) + comments -----------------
     def add_trip(self, email: str, trip: dict) -> None:

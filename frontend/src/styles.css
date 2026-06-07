@@ -363,9 +363,20 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--g
 .node-top { display: flex; justify-content: space-between; align-items: flex-start; }
 .node-top b { color: var(--text-strong); }
 .node-name { display: block; font-size: 11px; color: var(--text-muted); }
-.node-status { font-size: 11px; font-weight: 700; }
+.node-status { font-size: 11px; font-weight: 700; white-space: nowrap; }
 .node-status.online { color: var(--flow); }
-.node-status.offline { color: var(--red); }
+.node-status.connecting { color: var(--amber); }
+.node-status.planned { color: var(--text-muted); }
+.node-card.stage-online { border-left: 3px solid var(--flow); }
+.node-card.stage-connecting { border-left: 3px solid var(--amber); }
+.node-card.stage-planned { border-left: 3px solid var(--text-muted); opacity: 0.92; }
+.connect-steps { list-style: none; margin: 8px 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.connect-steps li { font-size: 11.5px; color: var(--text-muted); display: flex; gap: 7px; align-items: baseline; }
+.connect-steps li.done { color: var(--text); }
+.step-tick { color: var(--text-muted); font-weight: 700; }
+.connect-steps li.done .step-tick { color: var(--flow); }
+.connect-btn { width: 100%; margin-top: 10px; font-size: 13px; }
+.cam-dot.linking { background: var(--amber); }
 .node-meta { display: flex; gap: 6px; margin: 8px 0; }
 .chip { font-size: 11px; padding: 3px 9px; border-radius: 999px; background: var(--surface); border: 1px solid var(--border-soft); color: var(--text-muted); }
 .chip.gold { color: var(--gold); border-color: var(--border); }

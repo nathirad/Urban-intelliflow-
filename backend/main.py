@@ -201,8 +201,21 @@ async def get_route(q: RouteQuery, authorization: str | None = Header(default=No
 # --- Police / Ops: edge fleet (Jetson + CCTV) monitoring -------------------
 @app.get("/api/cameras")
 def get_cameras():
-    """CCTV + Jetson node health and detection stats — for the police/ops monitor."""
+    """CCTV + Jetson node health, connection lifecycle, and detection stats."""
     return {"fleet": STATE.fleet_summary(), "nodes": STATE.nodes_list()}
+
+
+@app.post("/api/cameras/{jid}/connect")
+def connect_camera(jid: str, authorization: str | None = Header(default=None)):
+    """Run the Jetson↔CCTV handshake for a node (officer/admin only)."""
+    user = STORE.user_for_token(_token(authorization))
+    if not user or user["role"] not in ("officer", "admin"):
+        raise HTTPException(403, "เฉพาะเจ้าหน้าที่/ผู้ดูแลเท่านั้น")
+    node = STATE.connect_node(jid)
+    if not node:
+        raise HTTPException(404, f"unknown node {jid}")
+    STATE.log_agent("provisioning", f"{jid} เชื่อมต่อ Jetson + CCTV สำเร็จ → ออนไลน์")
+    return node
 
 
 # --- User trips (PDPA-consented history) -----------------------------------

@@ -119,9 +119,28 @@ def test_cameras_fleet():
         d = c.get("/api/cameras").json()
         assert d["fleet"]["nodes_total"] == 5
         assert d["fleet"]["cameras_total"] == 10
-        n0 = d["nodes"][0]
-        assert n0["model"] in ("yolo26n", "yolo26m")
-        assert len(n0["cameras"]) == 2
+        # Honest provisioning: not all hardware is live (2 pilot online).
+        assert d["fleet"]["nodes_online"] == 2
+        assert d["fleet"]["nodes_connecting"] + d["fleet"]["nodes_planned"] == 3
+        stages = {n["junction_id"]: n["stage"] for n in d["nodes"]}
+        assert stages["MITR-01"] == "online" and stages["PRAC-01"] == "planned"
+        for n in d["nodes"]:
+            assert n["model"] in ("yolo26n", "yolo26m")
+            assert len(n["cameras"]) == 2
+            assert len(n["steps"]) == 6
+
+
+def test_camera_connect_requires_officer():
+    with _client() as c:
+        # citizen cannot connect a node
+        ctok = c.post("/api/auth/login", json={"email": "citizen@khonkaen.go.th", "password": "demo1234"}).json()["token"]
+        assert c.post("/api/cameras/PRAC-01/connect", headers={"Authorization": f"Bearer {ctok}"}).status_code == 403
+        # officer can; node goes online with all steps done
+        otok = c.post("/api/auth/login", json={"email": "officer@khonkaen.go.th", "password": "demo1234"}).json()["token"]
+        r = c.post("/api/cameras/PRAC-01/connect", headers={"Authorization": f"Bearer {otok}"})
+        assert r.status_code == 200
+        node = r.json()
+        assert node["stage"] == "online" and all(s["done"] for s in node["steps"])
 
 
 def test_trips_and_comments():
