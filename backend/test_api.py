@@ -135,12 +135,19 @@ def test_camera_connect_requires_officer():
         # citizen cannot connect a node
         ctok = c.post("/api/auth/login", json={"email": "citizen@khonkaen.go.th", "password": "demo1234"}).json()["token"]
         assert c.post("/api/cameras/PRAC-01/connect", headers={"Authorization": f"Bearer {ctok}"}).status_code == 403
-        # officer can; node goes online with all steps done
+        # officer attempt on a node with NO real hardware → honestly rejected
         otok = c.post("/api/auth/login", json={"email": "officer@khonkaen.go.th", "password": "demo1234"}).json()["token"]
-        r = c.post("/api/cameras/PRAC-01/connect", headers={"Authorization": f"Bearer {otok}"})
+        h = {"Authorization": f"Bearer {otok}"}
+        r = c.post("/api/cameras/PRAC-01/connect", headers=h)
         assert r.status_code == 200
-        node = r.json()
-        assert node["stage"] == "online" and all(s["done"] for s in node["steps"])
+        out = r.json()
+        assert out["ok"] is False and out["rejected"] is True
+        assert "ยังไม่พบ" in out["message"]
+        # and the node stays "planned" (not faked online)
+        stages = {n["junction_id"]: n["stage"] for n in c.get("/api/cameras").json()["nodes"]}
+        assert stages["PRAC-01"] == "planned"
+        # an already-online pilot node reports ok
+        assert c.post("/api/cameras/MITR-01/connect", headers=h).json()["ok"] is True
 
 
 def test_trips_and_comments():

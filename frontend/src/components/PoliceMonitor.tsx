@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { usePolling, postJSON } from "../api";
 import { IconCamera } from "../icons";
 
@@ -18,9 +19,18 @@ export default function PoliceMonitor() {
   const { data, refresh } = usePolling("/api/cameras", 2500, { fleet: {}, nodes: [] });
   const fleet = data?.fleet || {};
   const nodes = data?.nodes || [];
+  const [res, setRes] = useState<Record<string, { processing?: boolean; ok?: boolean; message?: string }>>({});
 
   const connect = async (jid: string) => {
-    try { await postJSON(`/api/cameras/${jid}/connect`, {}); refresh(); } catch { /* noop */ }
+    setRes((r) => ({ ...r, [jid]: { processing: true } }));
+    try {
+      // Real handshake attempt. Backend rejects if no physical device is registered.
+      const out = await postJSON(`/api/cameras/${jid}/connect`, {});
+      setRes((r) => ({ ...r, [jid]: { ok: out.ok, message: out.message } }));
+      if (out.ok) refresh();
+    } catch (e: any) {
+      setRes((r) => ({ ...r, [jid]: { ok: false, message: e.message || "เชื่อมต่อไม่สำเร็จ" } }));
+    }
   };
 
   return (
@@ -85,9 +95,17 @@ export default function PoliceMonitor() {
               </div>
 
               {n.stage !== "online" && (
-                <button className="btn gold connect-btn" onClick={() => connect(n.junction_id)}>
-                  {n.stage === "connecting" ? "เชื่อมต่อให้เสร็จ (ทดสอบ)" : "เริ่มเชื่อมต่อ Jetson + กล้อง"}
-                </button>
+                <>
+                  <button className="btn gold connect-btn" disabled={res[n.junction_id]?.processing}
+                          onClick={() => connect(n.junction_id)}>
+                    {res[n.junction_id]?.processing ? "กำลังตรวจสอบการเชื่อมต่อ…" : "ทดสอบเชื่อมต่อ Jetson + กล้อง"}
+                  </button>
+                  {res[n.junction_id]?.message && !res[n.junction_id]?.processing && (
+                    <div className={`connect-result ${res[n.junction_id]?.ok ? "ok" : "rejected"}`}>
+                      {res[n.junction_id]?.message}
+                    </div>
+                  )}
+                </>
               )}
             </div>
           ))}

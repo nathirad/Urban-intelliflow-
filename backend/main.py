@@ -207,15 +207,21 @@ def get_cameras():
 
 @app.post("/api/cameras/{jid}/connect")
 def connect_camera(jid: str, authorization: str | None = Header(default=None)):
-    """Run the Jetson↔CCTV handshake for a node (officer/admin only)."""
+    """Attempt the real Jetson↔CCTV handshake (officer/admin only).
+
+    Honest: rejects when no physical device is registered at the junction —
+    so an officer always knows whether the hardware is actually connected."""
     user = STORE.user_for_token(_token(authorization))
     if not user or user["role"] not in ("officer", "admin"):
         raise HTTPException(403, "เฉพาะเจ้าหน้าที่/ผู้ดูแลเท่านั้น")
-    node = STATE.connect_node(jid)
-    if not node:
+    result = STATE.connect_node(jid)
+    if result is None:
         raise HTTPException(404, f"unknown node {jid}")
-    STATE.log_agent("provisioning", f"{jid} เชื่อมต่อ Jetson + CCTV สำเร็จ → ออนไลน์")
-    return node
+    if result["ok"]:
+        STATE.log_agent("provisioning", f"{jid} เชื่อมต่อ Jetson + CCTV สำเร็จ → ออนไลน์")
+    else:
+        STATE.log_agent("provisioning", f"{jid} พยายามเชื่อมต่อแต่ยังไม่มีอุปกรณ์จริง → ปฏิเสธ")
+    return result
 
 
 # --- User trips (PDPA-consented history) -----------------------------------

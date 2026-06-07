@@ -339,7 +339,13 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--g
 .auth-card { width: 100%; max-width: 400px; }
 .auth-card .top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
 .auth-card h3 { font-size: 27px; color: var(--text-strong); }
-.auth-card .lead { color: var(--text-muted); font-size: 13px; margin-bottom: 20px; }
+.auth-card .lead { color: var(--text-muted); font-size: 13px; margin: 4px 0 20px; }
+.portal-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 14px 0 6px;
+  background: var(--surface-2); padding: 5px; border-radius: 12px; border: 1px solid var(--border-soft); }
+.portal-tab { display: flex; align-items: center; justify-content: center; gap: 7px;
+  padding: 10px 8px; border-radius: 9px; cursor: pointer; font-size: 13px; font-weight: 600;
+  background: transparent; border: 1px solid transparent; color: var(--text-muted); }
+.portal-tab.active { background: var(--brand); color: #fff; border-color: var(--gold); }
 .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
 .field label { font-size: 12px; color: var(--text-muted); }
 .field input, .field select { width: 100%; }
@@ -376,6 +382,9 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--g
 .step-tick { color: var(--text-muted); font-weight: 700; }
 .connect-steps li.done .step-tick { color: var(--flow); }
 .connect-btn { width: 100%; margin-top: 10px; font-size: 13px; }
+.connect-result { margin-top: 9px; font-size: 12px; padding: 9px 11px; border-radius: 9px; line-height: 1.5; }
+.connect-result.rejected { background: rgba(224,104,92,0.14); border: 1px solid var(--red); color: var(--red); }
+.connect-result.ok { background: rgba(75,189,140,0.14); border: 1px solid var(--flow); color: var(--flow); }
 .cam-dot.linking { background: var(--amber); }
 .node-meta { display: flex; gap: 6px; margin: 8px 0; }
 .chip { font-size: 11px; padding: 3px 9px; border-radius: 999px; background: var(--surface); border: 1px solid var(--border-soft); color: var(--text-muted); }

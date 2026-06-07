@@ -101,6 +101,8 @@ class _LiveState:
                 "jetson": "Jetson Orin" if orin else "Jetson Nano",
                 "model": "yolo26m" if orin else "yolo26n",
                 "stage": stage, "status": stage,
+                # A real Jetson/CCTV is only registered for the live pilot nodes.
+                "device_registered": stage == "online",
                 "fps": 0.0, "gpu_temp_c": 0.0, "detections_today": 0,
                 "uptime_pct": round(99.0 + 0.9 * (hash(j["id"]) % 10) / 10, 2) if stage == "online" else 0.0,
                 "last_heartbeat": datetime.now(timezone.utc).isoformat() if stage != "planned" else None,
@@ -286,11 +288,30 @@ class _LiveState:
             }
 
     def connect_node(self, jid: str) -> dict | None:
-        """Simulate completing the Jetson↔CCTV handshake for a node (demo action)."""
+        """Attempt the real Jetson↔CCTV handshake.
+
+        Honest behaviour: if no real device is registered at this junction (i.e.
+        the hardware hasn't actually been installed yet), the connection is
+        REJECTED — we never fake a success. Returns a result dict:
+            {ok, rejected?, message, node?}
+        Returns None only if the junction id is unknown.
+        """
         with self._lock:
             n = self.nodes.get(jid)
             if not n:
                 return None
+            if n["stage"] == "online":
+                return {"ok": True, "message": "แยกนี้ออนไลน์อยู่แล้ว", "node": dict(n)}
+            if not n.get("device_registered"):
+                # No physical Jetson/camera paired to the backend → cannot connect.
+                return {
+                    "ok": False, "rejected": True,
+                    "message": ("❌ เชื่อมต่อไม่สำเร็จ: ยังไม่พบ Jetson Nano/กล้องจริงที่แยกนี้ "
+                                "(ยังไม่ได้ติดตั้ง/ลงทะเบียนอุปกรณ์หน้างาน). "
+                                "ระบบยังไม่ได้ทำการเชื่อมต่อจริง — ต้องนำ Jetson ไปติดตั้งและจับคู่ก่อน"),
+                    "node": dict(n),
+                }
+            # Real device present → finalize the handshake.
             n["stage"] = n["status"] = "online"
             n["uptime_pct"] = 99.0
             n["last_heartbeat"] = datetime.now(timezone.utc).isoformat()
@@ -299,7 +320,7 @@ class _LiveState:
             for c in n["cameras"]:
                 c["status"] = "online"
                 c["fps"] = 25
-            return dict(n)
+            return {"ok": True, "message": "เชื่อมต่อ Jetson + กล้องสำเร็จ → ออนไลน์", "node": dict(n)}
 
     # -- User trips (PDPA: consented, anonymized) + comments -----------------
     def add_trip(self, email: str, trip: dict) -> None:

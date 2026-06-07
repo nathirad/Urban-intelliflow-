@@ -90,11 +90,37 @@ function Header({ title, live, summary, user, logout }) {
   );
 }
 
+function CitizenOverview({ summary, go }: { summary: any; go: () => void }) {
+  const pct = Math.round((summary?.avg_congestion || 0) * 100);
+  const level = pct >= 66 ? "หนาแน่น" : pct >= 33 ? "ปานกลาง" : "คล่องตัว";
+  const color = pct >= 66 ? "var(--red)" : pct >= 33 ? "var(--amber)" : "var(--flow)";
+  return (
+    <div className="card">
+      <h2>สภาพจราจรสำหรับคุณ</h2>
+      <div style={{ textAlign: "center", margin: "10px 0 16px" }}>
+        <div style={{ fontFamily: "var(--font-head)", fontSize: 46, color }}>{pct}%</div>
+        <div className="muted">ความหนาแน่นเฉลี่ยทั้งเมือง · <b style={{ color }}>{level}</b></div>
+      </div>
+      <p className="muted" style={{ fontSize: 13, marginBottom: 14 }}>
+        ระบบกำลังดูแล {summary?.junctions_active ?? 0} แยกหลักแบบเรียลไทม์
+        เพื่อช่วยให้คุณเดินทางได้คล่องขึ้น
+      </p>
+      <button className="btn" style={{ width: "100%" }} onClick={go}>
+        แนะนำเส้นทาง · แจ้งปัญหา · ดูการเดินทางของฉัน
+      </button>
+      <div className="muted small" style={{ marginTop: 12 }}>
+        🔒 ความเป็นส่วนตัวของคุณถูกคุ้มครองตาม PDPA — เก็บประวัติเมื่อยินยอม และลบได้ทุกเมื่อ
+      </div>
+    </div>
+  );
+}
+
 function Dashboard() {
   const { user, logout } = useAuth();
   const nav = NAV.filter((n) => n.roles.includes(user.role));
   const [active, setActive] = useState(nav[0].key);
   const activeNav = nav.find((n) => n.key === active) || nav[0];
+  const isCitizen = user.role === "citizen";  // citizens get a simplified, non-technical app
 
   const { data: summary, error } = usePolling("/api/summary", 2000, FALLBACK_SUMMARY);
   const { data: junctions } = usePolling("/api/junctions", 2000, []);
@@ -107,18 +133,30 @@ function Dashboard() {
       <div className="main">
         <Header title={activeNav.title} live={live} summary={summary} user={user} logout={logout} />
         <div className="content">
-          <div className="kpi-strip">
-            <div className="kpi"><div className="label">แยกที่เฝ้าระวัง</div>
-              <div className="value"><CountUp value={summary?.junctions_active} /></div></div>
-            <div className="kpi"><div className="label">ความหนาแน่นเฉลี่ย</div>
-              <div className="value"><CountUp value={(summary?.avg_congestion || 0) * 100} suffix="%" /></div></div>
-            <div className="kpi"><div className="label">Auto / Manual</div>
-              <div className="value">{summary?.mode_auto ?? 0} / {summary?.mode_manual ?? 0}</div></div>
-            <div className="kpi"><div className="label">เหตุการณ์ที่กำลังเกิด</div>
-              <div className="value alert">{summary?.active_incidents ?? 0}</div></div>
-            <div className="kpi"><div className="label">ติดตั้งแล้ว</div>
-              <div className="value">{bv?.junctions_deployed ?? 0}<small style={{ fontSize: 16 }}>/{bv?.junctions_planned ?? 0}</small></div></div>
-          </div>
+          {/* KPI strip — citizens see only public, non-technical figures */}
+          {isCitizen ? (
+            <div className="kpi-strip" style={{ gridTemplateColumns: "repeat(3,1fr)" }}>
+              <div className="kpi"><div className="label">แยกที่เฝ้าระวัง</div>
+                <div className="value"><CountUp value={summary?.junctions_active} /></div></div>
+              <div className="kpi"><div className="label">ความหนาแน่นเฉลี่ย</div>
+                <div className="value"><CountUp value={(summary?.avg_congestion || 0) * 100} suffix="%" /></div></div>
+              <div className="kpi"><div className="label">สถานะระบบ</div>
+                <div className="value" style={{ color: "var(--flow)" }}>{live ? "พร้อมใช้งาน" : "ออฟไลน์"}</div></div>
+            </div>
+          ) : (
+            <div className="kpi-strip">
+              <div className="kpi"><div className="label">แยกที่เฝ้าระวัง</div>
+                <div className="value"><CountUp value={summary?.junctions_active} /></div></div>
+              <div className="kpi"><div className="label">ความหนาแน่นเฉลี่ย</div>
+                <div className="value"><CountUp value={(summary?.avg_congestion || 0) * 100} suffix="%" /></div></div>
+              <div className="kpi"><div className="label">Auto / Manual</div>
+                <div className="value">{summary?.mode_auto ?? 0} / {summary?.mode_manual ?? 0}</div></div>
+              <div className="kpi"><div className="label">เหตุการณ์ที่กำลังเกิด</div>
+                <div className="value alert">{summary?.active_incidents ?? 0}</div></div>
+              <div className="kpi"><div className="label">ติดตั้งแล้ว</div>
+                <div className="value">{bv?.junctions_deployed ?? 0}<small style={{ fontSize: 16 }}>/{bv?.junctions_planned ?? 0}</small></div></div>
+            </div>
+          )}
 
           {active === "overview" && (
             <div className="grid">
@@ -126,7 +164,9 @@ function Dashboard() {
                 <h2>แผนที่จราจรขอนแก่น (เรียลไทม์)</h2>
                 <LiveMap junctions={junctions || []} />
               </div>
-              <BusinessValue data={bv} />
+              {isCitizen
+                ? <CitizenOverview summary={summary} go={() => setActive("citizen")} />
+                : <BusinessValue data={bv} />}
             </div>
           )}
           {active === "analytics" && (
