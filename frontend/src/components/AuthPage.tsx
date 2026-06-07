@@ -109,6 +109,11 @@ export default function AuthPage() {
 
       <section className="auth-panel">
         <div className="auth-card">
+          <div className="auth-card-brand">
+            <img src="/logo.png" alt="Urban IntelliFlow"
+                 onError={(e) => { const t = e.currentTarget as HTMLImageElement; if (!t.src.endsWith("/logo.svg")) t.src = "/logo.svg"; }} />
+            <div className="t">Urban <b>IntelliFlow</b></div>
+          </div>
           <div className="top">
             <h3>{mode === "login" ? "เข้าสู่ระบบ" : "สมัครสมาชิก"}</h3>
             <button className="icon-btn" onClick={toggle} title="สลับธีม" aria-label="toggle theme">

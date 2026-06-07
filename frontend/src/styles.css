@@ -337,6 +337,10 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--g
 
 .auth-panel { display: flex; align-items: center; justify-content: center; padding: 40px; background: var(--bg-0); }
 .auth-card { width: 100%; max-width: 400px; }
+.auth-card-brand { display: flex; align-items: center; gap: 11px; margin-bottom: 14px; }
+.auth-card-brand img { width: 46px; height: 46px; border-radius: 12px; box-shadow: var(--shadow); }
+.auth-card-brand .t { font-family: var(--font-head); font-size: 20px; color: var(--text-strong); line-height: 1; }
+.auth-card-brand .t b { color: var(--gold); font-weight: 400; }
 .auth-card .top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
 .auth-card h3 { font-size: 27px; color: var(--text-strong); }
 .auth-card .lead { color: var(--text-muted); font-size: 13px; margin: 4px 0 20px; }
