@@ -1,4 +1,4 @@
-import { usePolling } from "../api.js";
+import { usePolling } from "../api";
 
 const sevClass = { high: "sev-high", moderate: "sev-mod", low: "sev-low" };
 const timeAgo = (iso) => {

@@ -1,19 +1,19 @@
 import { useState } from "react";
-import { usePolling } from "./api.js";
-import { useAuth, useTheme } from "./contexts.jsx";
-import AuthPage from "./components/AuthPage.jsx";
-import LiveMap from "./components/LiveMap.jsx";
-import BusinessValue from "./components/BusinessValue.jsx";
-import TrafficAnalytics from "./components/TrafficAnalytics.jsx";
-import IncidentFeed from "./components/IncidentFeed.jsx";
-import CitizenEngagement from "./components/CitizenEngagement.jsx";
-import JunctionControl from "./components/JunctionControl.jsx";
-import RouteDemo from "./components/RouteDemo.jsx";
-import CountUp from "./components/CountUp.jsx";
-import AssistantChat from "./components/AssistantChat.jsx";
+import { usePolling } from "./api";
+import { useAuth, useTheme } from "./contexts";
+import AuthPage from "./components/AuthPage";
+import LiveMap from "./components/LiveMap";
+import BusinessValue from "./components/BusinessValue";
+import TrafficAnalytics from "./components/TrafficAnalytics";
+import IncidentFeed from "./components/IncidentFeed";
+import CitizenEngagement from "./components/CitizenEngagement";
+import JunctionControl from "./components/JunctionControl";
+import RouteDemo from "./components/RouteDemo";
+import CountUp from "./components/CountUp";
+import AssistantChat from "./components/AssistantChat";
 import {
   IconMap, IconChart, IconControl, IconUsers, IconSun, IconMoon, IconLogout, IconBell,
-} from "./icons.jsx";
+} from "./icons";
 
 const NAV = [
   { key: "overview", label: "ภาพรวมเมือง", title: "ภาพรวมเมือง · City Overview", Icon: IconMap, roles: ["citizen", "officer", "admin"] },

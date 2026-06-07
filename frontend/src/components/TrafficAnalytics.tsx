@@ -2,8 +2,8 @@ import {
   AreaChart, Area, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
   CartesianGrid, Cell,
 } from "recharts";
-import { usePolling } from "../api.js";
-import { congestionColor, theme } from "../theme.js";
+import { usePolling } from "../api";
+import { congestionColor, theme } from "../theme";
 
 // Traffic Analytics — time-of-day congestion + top-5 congested junctions.
 // Heatmap/peak data is the Spark-batch surrogate (state.py); top-5 is live.

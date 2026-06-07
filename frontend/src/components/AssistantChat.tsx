@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { postJSON } from "../api.js";
-import { IconChat, IconClose, IconSend, IconSpark } from "../icons.jsx";
+import { postJSON } from "../api";
+import { IconChat, IconClose, IconSend, IconSpark } from "../icons";
 
 const SUGGESTIONS = [
   "ระบบประหยัดงบยังไง",
@@ -9,7 +9,10 @@ const SUGGESTIONS = [
   "ข้อมูล PDPA เป็นยังไง",
 ];
 
-const GREETING = {
+type Source = { title: string };
+type Msg = { role: "bot" | "user"; text: string; sources?: Source[]; model?: string };
+
+const GREETING: Msg = {
   role: "bot",
   text: "สวัสดีค่ะ ฉันคือผู้ช่วย AI ของ Urban IntelliFlow 🚦 ถามเรื่องระบบจราจร ต้นทุน เหตุการณ์ หรือสถานะเรียลไทม์ได้เลยค่ะ",
   sources: [],
@@ -18,26 +21,26 @@ const GREETING = {
 // Floating RAG-powered assistant (grounded in docs + live state).
 export default function AssistantChat() {
   const [open, setOpen] = useState(false);
-  const [msgs, setMsgs] = useState([GREETING]);
+  const [msgs, setMsgs] = useState<Msg[]>([GREETING]);
   const [text, setText] = useState("");
   const [busy, setBusy] = useState(false);
-  const endRef = useRef(null);
+  const endRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [msgs, open]);
 
-  const ask = async (q) => {
+  const ask = async (q?: string) => {
     const query = (q ?? text).trim();
     if (!query || busy) return;
     setText("");
-    setMsgs((m) => [...m, { role: "user", text: query }]);
+    setMsgs((m) => [...m, { role: "user", text: query } as Msg]);
     setBusy(true);
     try {
       const r = await postJSON("/api/assistant", { query });
-      setMsgs((m) => [...m, { role: "bot", text: r.answer, sources: r.sources || [], model: r.model }]);
+      setMsgs((m) => [...m, { role: "bot", text: r.answer, sources: r.sources || [], model: r.model } as Msg]);
     } catch {
-      setMsgs((m) => [...m, { role: "bot", text: "ขออภัย เชื่อมต่อผู้ช่วยไม่ได้ในขณะนี้", sources: [] }]);
+      setMsgs((m) => [...m, { role: "bot", text: "ขออภัย เชื่อมต่อผู้ช่วยไม่ได้ในขณะนี้", sources: [] } as Msg]);
     } finally {
       setBusy(false);
     }

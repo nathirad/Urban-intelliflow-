@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { useAuth, useTheme } from "../contexts.jsx";
-import { IconMoon, IconSun } from "../icons.jsx";
+import { useAuth, useTheme } from "../contexts";
+import { IconMoon, IconSun } from "../icons";
 
 const ROLES = [
   ["citizen", "ประชาชน"],

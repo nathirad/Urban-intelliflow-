@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { postJSON, getJSON, TOKEN_KEY } from "./api.js";
+import { postJSON, getJSON, TOKEN_KEY } from "./api";
 
 /* ---------------- Theme (light / dark) ---------------- */
 const ThemeCtx = createContext(null);

@@ -9,7 +9,7 @@ import Feature from "ol/Feature";
 import Point from "ol/geom/Point";
 import { fromLonLat } from "ol/proj";
 import { Style, Circle as CircleStyle, Fill, Stroke, Text } from "ol/style";
-import { congestionColor, theme } from "../theme.js";
+import { congestionColor, theme } from "../theme";
 
 // Real Khon Kaen major intersections — fallback if the backend is offline.
 export const KHON_KAEN_JUNCTIONS = [
@@ -22,7 +22,7 @@ export const KHON_KAEN_JUNCTIONS = [
 
 const KK_CENTER = fromLonLat([102.836, 16.4419]);
 
-export default function LiveMap({ junctions = [], onSelect }) {
+export default function LiveMap({ junctions = [], onSelect }: { junctions?: any[]; onSelect?: (id: string) => void }) {
   const ref = useRef(null);
   const sourceRef = useRef(new VectorSource());
   const mapRef = useRef(null);

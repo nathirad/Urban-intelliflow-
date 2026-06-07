@@ -1,8 +1,8 @@
 import {
   LineChart, Line, XAxis, YAxis, Tooltip, ReferenceLine, ResponsiveContainer, CartesianGrid,
 } from "recharts";
-import { theme } from "../theme.js";
-import CountUp from "./CountUp.jsx";
+import { theme } from "../theme";
+import CountUp from "./CountUp";
 
 const fmt = (n) => new Intl.NumberFormat("th-TH").format(Math.round(n || 0));
 

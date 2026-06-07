@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts";
-import { usePolling, postJSON } from "../api.js";
-import { CHART_COLORS, CATEGORY_LABEL } from "../theme.js";
+import { usePolling, postJSON } from "../api";
+import { CHART_COLORS, CATEGORY_LABEL } from "../theme";
 
 // Citizen Engagement (Agent 5) — complaint classification donut + report form.
 export default function CitizenEngagement() {

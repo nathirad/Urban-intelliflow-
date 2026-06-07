@@ -1,5 +1,5 @@
-import { usePolling, postJSON } from "../api.js";
-import { congestionColor, congestionLabel } from "../theme.js";
+import { usePolling, postJSON } from "../api";
+import { congestionColor, congestionLabel } from "../theme";
 
 // Operations / Officer view — live per-junction timing + Auto↔Manual (simulated
 // Modbus PLC) toggle, plus the multi-agent activity log.

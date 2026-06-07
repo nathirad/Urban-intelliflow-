@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { postJSON } from "../api.js";
+import { postJSON } from "../api";
 
 const JUNCTIONS = [
   ["MITR-01", "ถ.มิตรภาพ x ศรีจันทร์"],
