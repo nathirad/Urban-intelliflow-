@@ -26,3 +26,6 @@ mnt/
 # Local agent/IDE tooling
 .claude/
 .gstack/
+
+# PDFs are delivered to Desktop, not committed
+*.pdf
