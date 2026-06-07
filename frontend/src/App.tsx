@@ -1,7 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { usePolling } from "./api";
 import { useAuth, useTheme } from "./contexts";
 import AuthPage from "./components/AuthPage";
+import Avatar from "./components/Avatar";
+import LoadingScreen from "./components/LoadingScreen";
 import LiveMap from "./components/LiveMap";
 import BusinessValue from "./components/BusinessValue";
 import TrafficAnalytics from "./components/TrafficAnalytics";
@@ -64,7 +66,6 @@ function Sidebar({ nav, active, setActive, role }) {
 function Header({ title, live, summary, user, logout }) {
   const { theme, toggle } = useTheme();
   const uptime = summary?.uptime_seconds || 0;
-  const initials = (user?.name || "?").trim().charAt(0).toUpperCase();
   return (
     <header className="header">
       <div className="page-title">
@@ -79,7 +80,7 @@ function Header({ title, live, summary, user, logout }) {
         {theme === "dark" ? <IconSun /> : <IconMoon />}
       </button>
       <div className="user-menu">
-        <div className="avatar">{initials}</div>
+        <Avatar name={user?.name} role={user?.role} avatarUrl={user?.avatarUrl} />
         <div className="who">
           <b>{user?.name}</b>
           <span>{user?.role_label}</span>
@@ -194,8 +195,19 @@ function Dashboard() {
 
 export default function App() {
   const { user, ready } = useAuth();
-  if (!ready) {
-    return <div style={{ minHeight: "100vh", display: "grid", placeItems: "center", color: "var(--text-muted)" }}>กำลังโหลด…</div>;
-  }
-  return user ? <Dashboard /> : <AuthPage />;
+  const [entered, setEntered] = useState(false);
+
+  // Show a branded loading splash for a moment after auth before the dashboard.
+  useEffect(() => {
+    if (user && !entered) {
+      const t = setTimeout(() => setEntered(true), 1400);
+      return () => clearTimeout(t);
+    }
+    if (!user && entered) setEntered(false);
+  }, [user, entered]);
+
+  if (!ready) return <LoadingScreen title="กำลังเริ่มระบบ…" />;
+  if (!user) return <AuthPage />;
+  if (!entered) return <LoadingScreen title="กำลังเข้าสู่ระบบ…" user={user} />;
+  return <Dashboard />;
 }
