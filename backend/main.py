@@ -185,8 +185,50 @@ class RouteQuery(BaseModel):
 
 
 @app.post("/api/route")
-async def get_route(q: RouteQuery):
-    return await route_guidance.run(q.model_dump())
+async def get_route(q: RouteQuery, authorization: str | None = Header(default=None)):
+    result = await route_guidance.run(q.model_dump())
+    # PDPA: log the trip to the user's consented history (anonymized by email key).
+    user = STORE.user_for_token(_token(authorization))
+    if user:
+        STATE.add_trip(user["email"], {
+            "origin": q.origin, "destination": q.destination,
+            "minutes": result["estimated_minutes"],
+            "congestion_level": result["congestion_level"],
+        })
+    return result
+
+
+# --- Police / Ops: edge fleet (Jetson + CCTV) monitoring -------------------
+@app.get("/api/cameras")
+def get_cameras():
+    """CCTV + Jetson node health and detection stats — for the police/ops monitor."""
+    return {"fleet": STATE.fleet_summary(), "nodes": STATE.nodes_list()}
+
+
+# --- User trips (PDPA-consented history) -----------------------------------
+@app.get("/api/trips")
+def get_trips(authorization: str | None = Header(default=None)):
+    user = STORE.user_for_token(_token(authorization))
+    if not user:
+        raise HTTPException(401, "ไม่ได้เข้าสู่ระบบ")
+    return {"user": user["email"], "trips": STATE.trips_for(user["email"])}
+
+
+# --- Citizen comments / opinions -------------------------------------------
+class CommentBody(BaseModel):
+    text: str
+
+
+@app.get("/api/comments")
+def get_comments():
+    return STATE.comments_list()
+
+
+@app.post("/api/comments")
+def post_comment(body: CommentBody, authorization: str | None = Header(default=None)):
+    user = STORE.user_for_token(_token(authorization))
+    name = user["name"] if user else "ผู้ใช้ทั่วไป"
+    return STATE.add_comment(name, body.text.strip()[:280])
 
 
 # --- Citizen feedback (Agent 5) --------------------------------------------

@@ -68,6 +68,26 @@ class _LiveState:
         self.complaints_total = 0
         self.complaints_resolved = 0
 
+        # Edge nodes (Jetson + cameras) per junction — for the police/ops monitor.
+        self.nodes: dict[str, dict] = {}
+        for j in JUNCTIONS_SEED:
+            orin = j["zone"] == "A"
+            self.nodes[j["id"]] = {
+                "node_id": j["zone"], "junction_id": j["id"], "name": j["name"],
+                "jetson": "Jetson Orin" if orin else "Jetson Nano",
+                "model": "yolo26m" if orin else "yolo26n",
+                "status": "online", "fps": 0.0, "gpu_temp_c": 0.0,
+                "detections_today": 0, "uptime_pct": round(99.0 + 0.9 * (hash(j["id"]) % 10) / 10, 2),
+                "cameras": [
+                    {"id": f"cam-{j['id']}-1", "view": "ขาเข้าหลัก", "status": "online", "resolution": "4MP", "fps": 25},
+                    {"id": f"cam-{j['id']}-2", "view": "ขาออก/คนข้าม", "status": "online", "resolution": "4MP", "fps": 25},
+                ],
+            }
+
+        # User trip history (PDPA: per-user, consented, anonymized id) + comments
+        self.trips: dict[str, list] = defaultdict(list)
+        self.comments: deque = deque(maxlen=40)
+
     # -- writers (called by the sim / orchestrator) --------------------------
     def update_junction(self, event: dict, timing: dict) -> None:
         with self._lock:
@@ -90,6 +110,14 @@ class _LiveState:
             acc = self.hourly[hour]
             acc[0] += event["congestion_score"]
             acc[1] += 1
+
+            # Edge node telemetry (Jetson health + cumulative detections)
+            node = self.nodes.get(event["junction_id"])
+            if node:
+                node["detections_today"] += event["vehicle_count"]
+                load = event["congestion_score"]
+                node["fps"] = round(30 - 8 * load + (self.tick % 3) * 0.3, 1)
+                node["gpu_temp_c"] = round(46 + 16 * load + (self.tick % 5) * 0.4, 1)
 
     def add_incident(self, incident: dict) -> None:
         with self._lock:
@@ -206,6 +234,47 @@ class _LiveState:
     def agent_activity(self) -> list[dict]:
         with self._lock:
             return list(self.agent_log)
+
+    # -- Edge nodes / cameras (police & ops monitor) -------------------------
+    def nodes_list(self) -> list[dict]:
+        with self._lock:
+            return [dict(n) for n in self.nodes.values()]
+
+    def fleet_summary(self) -> dict:
+        with self._lock:
+            nodes = list(self.nodes.values())
+            cams = [c for n in nodes for c in n["cameras"]]
+            return {
+                "nodes_total": len(nodes),
+                "nodes_online": sum(1 for n in nodes if n["status"] == "online"),
+                "cameras_total": len(cams),
+                "cameras_online": sum(1 for c in cams if c["status"] == "online"),
+                "detections_today": sum(n["detections_today"] for n in nodes),
+                "avg_fps": round(sum(n["fps"] for n in nodes) / (len(nodes) or 1), 1),
+            }
+
+    # -- User trips (PDPA: consented, anonymized) + comments -----------------
+    def add_trip(self, email: str, trip: dict) -> None:
+        with self._lock:
+            trip = {**trip, "id": f"TRIP-{self.tick}-{len(self.trips[email])}",
+                    "at": datetime.now(timezone.utc).isoformat()}
+            self.trips[email].insert(0, trip)
+            self.trips[email] = self.trips[email][:25]
+
+    def trips_for(self, email: str) -> list[dict]:
+        with self._lock:
+            return list(self.trips.get(email, []))
+
+    def add_comment(self, user: str, text: str) -> dict:
+        with self._lock:
+            c = {"id": f"CMT-{self.tick}", "user": user, "text": text,
+                 "at": datetime.now(timezone.utc).isoformat()}
+            self.comments.appendleft(c)
+            return c
+
+    def comments_list(self) -> list[dict]:
+        with self._lock:
+            return list(self.comments)
 
 
 # Single shared instance.

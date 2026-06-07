@@ -11,14 +11,18 @@ import JunctionControl from "./components/JunctionControl";
 import RouteDemo from "./components/RouteDemo";
 import CountUp from "./components/CountUp";
 import AssistantChat from "./components/AssistantChat";
+import PoliceMonitor from "./components/PoliceMonitor";
+import MyTrips from "./components/MyTrips";
+import Comments from "./components/Comments";
 import {
-  IconMap, IconChart, IconControl, IconUsers, IconSun, IconMoon, IconLogout, IconBell,
+  IconMap, IconChart, IconControl, IconUsers, IconSun, IconMoon, IconLogout, IconBell, IconCamera,
 } from "./icons";
 
 const NAV = [
   { key: "overview", label: "ภาพรวมเมือง", title: "ภาพรวมเมือง · City Overview", Icon: IconMap, roles: ["citizen", "officer", "admin"] },
   { key: "analytics", label: "วิเคราะห์ & เหตุการณ์", title: "วิเคราะห์การจราจร & เหตุการณ์", Icon: IconChart, roles: ["officer", "admin"] },
   { key: "ops", label: "ศูนย์ควบคุม", title: "ศูนย์ควบคุมสัญญาณไฟ", Icon: IconControl, roles: ["officer", "admin"] },
+  { key: "police", label: "กล้อง CCTV & Edge AI", title: "ศูนย์กล้อง CCTV & Edge AI (Jetson)", Icon: IconCamera, roles: ["officer", "admin"] },
   { key: "citizen", label: "บริการประชาชน", title: "บริการประชาชน", Icon: IconUsers, roles: ["citizen", "officer", "admin"] },
 ];
 
@@ -129,8 +133,12 @@ function Dashboard() {
             <div className="grid"><TrafficAnalytics /><IncidentFeed /></div>
           )}
           {active === "ops" && <JunctionControl />}
+          {active === "police" && <PoliceMonitor />}
           {active === "citizen" && (
-            <div className="grid"><RouteDemo /><CitizenEngagement /></div>
+            <>
+              <div className="grid"><RouteDemo /><CitizenEngagement /></div>
+              <div className="grid" style={{ marginTop: 16 }}><MyTrips /><Comments /></div>
+            </>
           )}
 
           <footer className="foot">

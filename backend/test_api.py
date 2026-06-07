@@ -112,3 +112,31 @@ def test_assistant_rag():
         # live-state grounding: a real-time question should surface current numbers
         live = c.post("/api/assistant", json={"query": "ตอนนี้แยกไหนรถติดสุด"}).json()
         assert "แยก" in live["answer"]
+
+
+def test_cameras_fleet():
+    with _client() as c:
+        d = c.get("/api/cameras").json()
+        assert d["fleet"]["nodes_total"] == 5
+        assert d["fleet"]["cameras_total"] == 10
+        n0 = d["nodes"][0]
+        assert n0["model"] in ("yolo26n", "yolo26m")
+        assert len(n0["cameras"]) == 2
+
+
+def test_trips_and_comments():
+    with _client() as c:
+        tok = c.post("/api/auth/login", json={"email": "citizen@khonkaen.go.th", "password": "demo1234"}).json()["token"]
+        h = {"Authorization": f"Bearer {tok}"}
+        trips = c.get("/api/trips", headers=h).json()
+        assert trips["user"] == "citizen@khonkaen.go.th"
+        assert len(trips["trips"]) >= 3            # seeded
+        assert c.get("/api/trips").status_code == 401   # auth required
+
+        # posting a route while authed logs a new trip
+        before = len(c.get("/api/trips", headers=h).json()["trips"])
+        c.post("/api/route", json={"origin": "MITR-01", "destination": "LAKE-01"}, headers=h)
+        assert len(c.get("/api/trips", headers=h).json()["trips"]) == before + 1
+
+        c.post("/api/comments", json={"text": "ทดสอบความคิดเห็น"}, headers=h)
+        assert any(x["text"] == "ทดสอบความคิดเห็น" for x in c.get("/api/comments").json())

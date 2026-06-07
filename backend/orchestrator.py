@@ -127,11 +127,27 @@ def _mock_event(force_spike: bool = False) -> dict:
     }
 
 
+_seeded = False
+
+
 def _seed_demo() -> None:
+    global _seeded
     business_value.set_rollout(deployed=len(JUNCTIONS), planned=120)
+    if _seeded:
+        return  # idempotent: don't duplicate demo data if the loop restarts
+    _seeded = True
     for cat, resolved in _SEED_COMPLAINTS:
         STATE.add_complaint(cat, resolved=resolved)
     STATE.seed_demo_history()
+    # Demo trip history for the seed citizen account (PDPA-consented sample)
+    for t in [
+        {"origin": "PRAC-01", "destination": "SRIC-01", "minutes": 12.4, "congestion_level": "moderate"},
+        {"origin": "MITR-01", "destination": "MITR-02", "minutes": 7.1, "congestion_level": "low"},
+        {"origin": "SRIC-01", "destination": "LAKE-01", "minutes": 9.8, "congestion_level": "low"},
+    ]:
+        STATE.add_trip("citizen@khonkaen.go.th", t)
+    STATE.add_comment("คุณมานี", "อยากให้เพิ่มเวลาไฟเขียวช่วงเย็นแถวหน้า มข. ครับ")
+    STATE.add_comment("จนท. สมชาย", "ทดสอบระบบกล้องแยกศรีจันทร์เรียบร้อย ใช้งานได้ดี")
 
 
 async def run_forever(interval: float = 1.5, verbose: bool = False) -> None:

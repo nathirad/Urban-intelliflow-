@@ -17,6 +17,8 @@ export const IconMoon = I(<path d="M21 12.8A8.5 8.5 0 1 1 11.2 3a6.6 6.6 0 0 0 9
 export const IconLogout = I(<><path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3" /><path d="M10 17l-5-5 5-5" /><line x1="5" y1="12" x2="16" y2="12" /></>);
 export const IconBell = I(<><path d="M6 9a6 6 0 1 1 12 0c0 5 2 6 2 6H4s2-1 2-6Z" /><path d="M10 20a2 2 0 0 0 4 0" /></>);
 export const IconTraffic = I(<><rect x="9" y="3" width="6" height="18" rx="3" /><circle cx="12" cy="8" r="1.4" fill="currentColor" stroke="none" /><circle cx="12" cy="12" r="1.4" fill="currentColor" stroke="none" /><circle cx="12" cy="16" r="1.4" fill="currentColor" stroke="none" /></>);
+export const IconCamera = I(<><path d="M3 8a2 2 0 0 1 2-2h2l1.2-1.8A1 1 0 0 1 9 3.7h6a1 1 0 0 1 .8.5L17 6h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z" /><circle cx="12" cy="12.5" r="3.2" /></>);
+export const IconRoute = I(<><circle cx="6" cy="19" r="2" /><circle cx="18" cy="5" r="2" /><path d="M8 19h6a3 3 0 0 0 0-6H9a3 3 0 0 1 0-6h5" /></>);
 export const IconChat = I(<><path d="M21 11.5a8.4 8.4 0 0 1-8.5 8.4 9 9 0 0 1-3.9-.9L3 20l1-4.3a8.2 8.2 0 0 1-1-3.9A8.4 8.4 0 0 1 11.5 3 8.4 8.4 0 0 1 21 11.5Z" /></>);
 export const IconSend = I(<><path d="M22 2 11 13" /><path d="M22 2 15 22l-4-9-9-4Z" /></>);
 export const IconClose = I(<><path d="M18 6 6 18M6 6l12 12" /></>);
