@@ -22,10 +22,11 @@ ROLES = {"citizen", "officer", "admin"}
 # holds the client id. If unset, the provider runs in clearly-labelled DEMO mode
 # (creates a demo account) so the login flow is usable without real credentials.
 OAUTH_PROVIDERS = {
-    "line":   {"label": "LINE",            "client_env": "LINE_CHANNEL_ID"},
-    "google": {"label": "Google",          "client_env": "GOOGLE_CLIENT_ID"},
-    "thaiid": {"label": "ThaiID",          "client_env": "THAIID_CLIENT_ID"},
-    "sso":    {"label": "บัญชีองค์กร (SSO)", "client_env": "OIDC_SSO_CLIENT_ID"},
+    "line":     {"label": "LINE",            "client_env": "LINE_CHANNEL_ID"},
+    "facebook": {"label": "Facebook",        "client_env": "FACEBOOK_APP_ID"},
+    "google":   {"label": "Google",          "client_env": "GOOGLE_CLIENT_ID"},
+    "thaiid":   {"label": "ThaiID",          "client_env": "THAIID_CLIENT_ID"},
+    "sso":      {"label": "บัญชีองค์กร (SSO)", "client_env": "OIDC_SSO_CLIENT_ID"},
 }
 
 

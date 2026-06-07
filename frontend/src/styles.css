@@ -370,7 +370,9 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--g
   border: 1px solid var(--border); background: var(--surface-solid); color: var(--text); }
 .social-btn:hover { border-color: var(--gold); }
 .social-btn:disabled { opacity: 0.6; cursor: default; }
+.social-logo { position: absolute; left: 14px; display: grid; place-items: center; }
 .social-btn.line { background: #06C755; color: #fff; border-color: #06C755; }
+.social-btn.facebook { background: #1877F2; color: #fff; border-color: #1877F2; }
 .social-btn.google { background: #fff; color: #1f2328; border-color: #dadce0; }
 .social-btn.thaiid { background: #2d4a8a; color: #fff; border-color: #2d4a8a; }
 .social-btn.sso { background: var(--brand); color: var(--gold-soft); border-color: var(--gold); }

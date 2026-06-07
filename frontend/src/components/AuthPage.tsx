@@ -2,18 +2,20 @@ import { useEffect, useState } from "react";
 import { useAuth, useTheme } from "../contexts";
 import { getJSON } from "../api";
 import { IconMoon, IconSun, IconUsers, IconCamera } from "../icons";
+import { LineLogo, FacebookLogo, GoogleLogo, ThaiIDLogo, SsoLogo } from "../brandIcons";
 
 type Audience = "citizen" | "officer";
 
-// Which providers each portal offers.
-const PROVIDERS: Record<Audience, { id: string; label: string; cls: string }[]> = {
+// Which providers each portal offers (with brand marks).
+const PROVIDERS: Record<Audience, { id: string; label: string; cls: string; Logo: any }[]> = {
   citizen: [
-    { id: "line", label: "เข้าสู่ระบบด้วย LINE", cls: "line" },
-    { id: "google", label: "เข้าสู่ระบบด้วย Google", cls: "google" },
-    { id: "thaiid", label: "ยืนยันตัวตนด้วย ThaiID", cls: "thaiid" },
+    { id: "line", label: "เข้าสู่ระบบด้วย LINE", cls: "line", Logo: LineLogo },
+    { id: "facebook", label: "เข้าสู่ระบบด้วย Facebook", cls: "facebook", Logo: FacebookLogo },
+    { id: "google", label: "เข้าสู่ระบบด้วย Google", cls: "google", Logo: GoogleLogo },
+    { id: "thaiid", label: "ยืนยันตัวตนด้วย ThaiID", cls: "thaiid", Logo: ThaiIDLogo },
   ],
   officer: [
-    { id: "sso", label: "เข้าสู่ระบบด้วยบัญชีองค์กร (SSO)", cls: "sso" },
+    { id: "sso", label: "เข้าสู่ระบบด้วยบัญชีองค์กร (SSO)", cls: "sso", Logo: SsoLogo },
   ],
 };
 
@@ -174,6 +176,7 @@ export default function AuthPage() {
             {PROVIDERS[audience].map((p) => (
               <button key={p.id} type="button" className={`social-btn ${p.cls}`}
                       disabled={busy} onClick={() => oauth(p.id)}>
+                <span className="social-logo"><p.Logo size={18} /></span>
                 {p.label}
                 {providers[p.id] && !providers[p.id].configured && <span className="demo-tag">เดโม</span>}
               </button>
