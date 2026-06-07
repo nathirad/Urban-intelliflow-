@@ -29,3 +29,11 @@ mnt/
 
 # PDFs are delivered to Desktop, not committed
 *.pdf
+
+# Report/analysis docs — kept local + as PDF on Desktop, not in repo (code-only)
+docs/PROJECT_PIPELINE_FULL.md
+docs/ANALYSIS_PDPA_YOLO_SIGNAL.md
+docs/GUIDE_AUTH_DB_FRAMEWORKS.md
+docs/IMPLEMENTATION_ROADMAP.md
+docs/MOCK_VS_REAL.md
+docs/CRITICAL_REVIEW.md
