@@ -6,6 +6,9 @@ import { LineLogo, FacebookLogo, GoogleLogo, ThaiIDLogo, SsoLogo } from "../bran
 
 type Audience = "citizen" | "officer";
 
+const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
+const Spinner = () => <span className="spin" aria-hidden="true" />;
+
 // Which providers each portal offers (with brand marks).
 const PROVIDERS: Record<Audience, { id: string; label: string; cls: string; Logo: any }[]> = {
   citizen: [
@@ -46,6 +49,7 @@ export default function AuthPage() {
   const [busy, setBusy] = useState(false);
   const [providers, setProviders] = useState<Record<string, { configured: boolean }>>({});
   const [pending, setPending] = useState<{ id: string; label: string; cls: string; Logo: any } | null>(null);
+  const [proc, setProc] = useState("");  // current processing step text
 
   useEffect(() => {
     getJSON("/api/auth/providers").then(setProviders).catch(() => {});
@@ -68,13 +72,18 @@ export default function AuthPage() {
   const consentAllow = async () => {
     if (!pending) return;
     setBusy(true);
+    const name = pending.label.match(/LINE|Facebook|Google|ThaiID/)?.[0] || "บัญชี";
+    const steps = [`กำลังเชื่อมต่อ ${name}…`, "กำลังยืนยันตัวตน…", "กำลังเตรียมบัญชีและสิทธิ์การเข้าถึง…"];
     try {
+      for (const s of steps) { setProc(s); await delay(650); }
+      setProc("กำลังเข้าสู่ระบบ…");
       await social(pending.id, audience);
     } catch (err: any) {
       setError(err.message || "เข้าสู่ระบบไม่สำเร็จ");
       setPending(null);
     } finally {
       setBusy(false);
+      setProc("");
     }
   };
 
@@ -82,14 +91,22 @@ export default function AuthPage() {
     e.preventDefault();
     setError("");
     setBusy(true);
+    setProc(mode === "login" ? "กำลังตรวจสอบข้อมูลเข้าสู่ระบบ…" : "กำลังสร้างบัญชี…");
+    const started = Date.now();
     try {
       if (mode === "login") await login(email, password);
       // citizen portal self-registers as citizen; staff registration defaults to officer
       else await register({ email, name, password, role: audience });
     } catch (err: any) {
+      // keep a processing feel even on failure
+      const left = 700 - (Date.now() - started);
+      if (left > 0) await delay(left);
       setError(err.message || "เกิดข้อผิดพลาด");
     } finally {
+      const left = 800 - (Date.now() - started);
+      if (left > 0) await delay(left);
       setBusy(false);
+      setProc("");
     }
   };
 
@@ -123,10 +140,14 @@ export default function AuthPage() {
                 <span>เดโม — ตัวอย่างบัญชีผู้ใช้</span>
               </div>
             </div>
-            <button className="btn consent-allow" disabled={busy} onClick={consentAllow}>
-              {busy ? "กำลังเข้าสู่ระบบ…" : "อนุญาตและดำเนินการต่อ"}
-            </button>
-            <button className="consent-cancel" disabled={busy} onClick={() => setPending(null)}>ยกเลิก</button>
+            {busy ? (
+              <div className="consent-processing"><Spinner /> {proc || "กำลังเข้าสู่ระบบ…"}</div>
+            ) : (
+              <>
+                <button className="btn consent-allow" onClick={consentAllow}>อนุญาตและดำเนินการต่อ</button>
+                <button className="consent-cancel" onClick={() => setPending(null)}>ยกเลิก</button>
+              </>
+            )}
             <div className="consent-note">
               🔒 หน้าจำลอง OAuth (เดโม) — ใน production จะ redirect ไปหน้า login จริงของ
               {" "}{P.label.match(/LINE|Facebook|Google|ThaiID/)?.[0]} ผ่าน Keycloak OIDC
@@ -218,7 +239,7 @@ export default function AuthPage() {
               </div>
             )}
             <button className="btn" disabled={busy}>
-              {busy ? "กำลังดำเนินการ…"
+              {busy ? <><Spinner /> {proc || "กำลังดำเนินการ…"}</>
                 : mode === "login" ? `เข้าสู่ระบบ (${PORTAL[audience].title})` : "สมัครสมาชิก"}
             </button>
           </form>
