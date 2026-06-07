@@ -206,3 +206,16 @@ async def submit_complaint(c: Complaint):
 def get_citizen_stats():
     """Complaint classification donut + response KPIs."""
     return STATE.citizen_stats()
+
+
+# --- RAG AI assistant -------------------------------------------------------
+class AssistantQuery(BaseModel):
+    query: str
+
+
+@app.post("/api/assistant")
+def assistant(q: AssistantQuery):
+    """Retrieval-Augmented assistant grounded in project docs + live state.
+    Uses Gemini 1.5 Flash when GEMINI_API_KEY is set, else an extractive answer."""
+    import rag
+    return rag.answer(q.query)

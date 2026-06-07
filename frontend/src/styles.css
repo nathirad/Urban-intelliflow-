@@ -4,6 +4,11 @@
    silver #A8A9AD, off-white #F5F0E8. Never Inter/Roboto.
    ============================================================ */
 
+:root {
+  --font-head: "Space Grotesk", "IBM Plex Sans Thai", "DM Serif Display", sans-serif;
+  --font-body: "IBM Plex Sans Thai", "Sarabun", system-ui, sans-serif;
+}
+
 :root,
 [data-theme="dark"] {
   --brand: #1b4d3e;
@@ -56,7 +61,7 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-  font-family: "Sarabun", system-ui, sans-serif;
+  font-family: var(--font-body);
   color: var(--text);
   background:
     radial-gradient(1100px 560px at 88% -8%, rgba(201, 168, 76, 0.14), transparent),
@@ -68,7 +73,7 @@ body {
   transition: background 0.3s, color 0.3s;
 }
 
-h1, h2, h3, .serif { font-family: "DM Serif Display", Georgia, serif; font-weight: 400; }
+h1, h2, h3, .serif { font-family: var(--font-head); font-weight: 400; }
 
 a { color: inherit; }
 button { font-family: inherit; }
@@ -89,7 +94,7 @@ button { font-family: inherit; }
   border-bottom: 1px solid var(--border-soft); margin-bottom: 12px;
 }
 .brand img { width: 44px; height: 44px; border-radius: 12px; box-shadow: var(--shadow); }
-.brand .name { font-family: "DM Serif Display", serif; font-size: 19px; line-height: 1.05; color: var(--text-strong); }
+.brand .name { font-family: var(--font-head); font-size: 19px; line-height: 1.05; color: var(--text-strong); }
 .brand .name b { color: var(--gold); font-weight: 400; }
 .brand .tag { font-size: 10px; color: var(--text-muted); letter-spacing: 0.4px; }
 
@@ -138,7 +143,7 @@ button { font-family: inherit; }
 }
 
 .icon-btn {
-  display: grid; place-items: center; width: 40px; height: 40px;
+  display: grid; place-items: center; width: 44px; height: 44px;
   border-radius: 11px; cursor: pointer; color: var(--text);
   background: var(--surface-2); border: 1px solid var(--border-soft);
   transition: all 0.15s;
@@ -167,7 +172,7 @@ button { font-family: inherit; }
   box-shadow: var(--shadow);
 }
 .kpi .label { color: var(--text-muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.6px; }
-.kpi .value { font-family: "DM Serif Display", serif; font-size: 29px; color: var(--gold); margin-top: 5px; }
+.kpi .value { font-family: var(--font-head); font-size: 29px; color: var(--gold); margin-top: 5px; }
 .kpi .value.alert { color: var(--amber); }
 
 /* ---- Cards / grids ---------------------------------------------------- */
@@ -180,7 +185,7 @@ button { font-family: inherit; }
 }
 .card h2 { font-size: 19px; margin-bottom: 12px; color: var(--heading); display: flex; align-items: center; gap: 10px; }
 .agent-tag {
-  font-family: "Sarabun", sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.5px;
+  font-family: var(--font-body); font-size: 10px; font-weight: 700; letter-spacing: 0.5px;
   padding: 3px 8px; border-radius: 6px; background: var(--surface-2); color: var(--brand-2);
   text-transform: uppercase; border: 1px solid var(--border-soft);
 }
@@ -214,11 +219,11 @@ button { font-family: inherit; }
 .bv-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 4px 0 14px; }
 .savings-badge {
   display: inline-block; background: var(--brand); color: var(--gold-soft);
-  font-family: "DM Serif Display", serif; font-size: 36px;
+  font-family: var(--font-head); font-size: 36px;
   padding: 8px 20px; border-radius: 12px; border: 1px solid var(--gold);
 }
 .ring-wrap { display: flex; align-items: center; gap: 8px; }
-.ring-num { font-family: "DM Serif Display", serif; font-size: 20px; fill: var(--heading); }
+.ring-num { font-family: var(--font-head); font-size: 20px; fill: var(--heading); }
 .ring-den { font-size: 11px; fill: var(--text-muted); }
 .ring-label { font-size: 11px; color: var(--text-muted); line-height: 1.2; }
 .cost-row { display: flex; justify-content: space-between; align-items: baseline; padding: 8px 0;
@@ -227,7 +232,7 @@ button { font-family: inherit; }
 .cost-row .new { color: var(--brand-2); font-weight: 700; font-size: 20px; }
 .metric-pair { display: grid; grid-template-columns: repeat(2,1fr); gap: 10px; margin-top: 12px; }
 .metric { background: var(--surface-2); border-radius: 12px; padding: 11px 12px; border: 1px solid var(--border-soft); }
-.metric .n { font-family: "DM Serif Display", serif; font-size: 24px; color: var(--heading); }
+.metric .n { font-family: var(--font-head); font-size: 24px; color: var(--heading); }
 .metric .n small { font-size: 13px; }
 .metric .l { font-size: 12px; color: var(--text-muted); }
 .bv-foot { margin-top: 12px; font-size: 12px; color: var(--text-muted); }
@@ -248,7 +253,7 @@ button { font-family: inherit; }
 /* ---- Citizen ---------------------------------------------------------- */
 .citizen-kpis { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 6px; }
 .citizen-kpis div { background: var(--surface-2); border-radius: 10px; padding: 10px; text-align: center; border: 1px solid var(--border-soft); }
-.citizen-kpis b { font-family: "DM Serif Display", serif; font-size: 24px; color: var(--heading); display: block; }
+.citizen-kpis b { font-family: var(--font-head); font-size: 24px; color: var(--heading); display: block; }
 .citizen-kpis span { font-size: 11px; color: var(--text-muted); }
 .complaint-form { display: flex; gap: 8px; margin-top: 10px; }
 .complaint-form input { flex: 1; }
@@ -281,9 +286,9 @@ button { font-family: inherit; }
 .route-controls { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; }
 .route-controls label { display: flex; flex-direction: column; font-size: 12px; color: var(--text-muted); gap: 4px; }
 .route-result { margin-top: 14px; background: var(--surface-2); border-radius: 12px; padding: 14px; border: 1px solid var(--border-soft); }
-.route-eta { font-family: "DM Serif Display", serif; font-size: 28px; color: var(--heading);
+.route-eta { font-family: var(--font-head); font-size: 28px; color: var(--heading);
   display: flex; align-items: center; gap: 12px; }
-.route-level { font-family: "Sarabun"; font-size: 12px; padding: 4px 10px; border-radius: 999px; font-weight: 700; }
+.route-level { font-family: var(--font-body); font-size: 12px; padding: 4px 10px; border-radius: 999px; font-weight: 700; }
 .lvl-low { background: rgba(75,189,140,0.18); color: var(--flow); }
 .lvl-moderate { background: rgba(230,178,60,0.2); color: var(--amber); }
 .lvl-high { background: rgba(224,104,92,0.2); color: var(--red); }
@@ -291,20 +296,20 @@ button { font-family: inherit; }
 
 /* ---- Inputs / buttons (shared) --------------------------------------- */
 input, select, textarea {
-  font-family: "Sarabun", sans-serif; font-size: 13px; color: var(--text);
-  padding: 10px 12px; border-radius: 10px;
+  font-family: var(--font-body); font-size: 14px; color: var(--text);
+  min-height: 44px; padding: 11px 13px; border-radius: 10px;
   background: var(--surface-solid); border: 1px solid var(--border);
 }
 input::placeholder { color: var(--text-muted); }
-input:focus, select:focus, textarea:focus { outline: none; border-color: var(--gold); }
+input:focus, select:focus, textarea:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px rgba(201,168,76,0.18); }
 .btn {
-  padding: 10px 18px; border-radius: 10px; border: none; cursor: pointer; font-weight: 600;
-  background: var(--brand); color: var(--gold-soft); transition: filter 0.15s;
+  min-height: 44px; padding: 11px 18px; border-radius: 10px; border: none; cursor: pointer; font-weight: 600;
+  font-size: 14px; background: var(--brand); color: var(--gold-soft); transition: filter 0.15s;
 }
 .btn:hover { filter: brightness(1.12); }
 .btn:disabled { opacity: 0.6; cursor: default; }
 .btn.gold { background: var(--gold); color: #1a1205; }
-.complaint-form button, .route-controls button { padding: 10px 18px; border-radius: 10px; border: none;
+.complaint-form button, .route-controls button { min-height: 44px; padding: 11px 18px; border-radius: 10px; border: none;
   cursor: pointer; background: var(--brand); color: var(--gold-soft); font-weight: 600; }
 
 /* ---- Footer ----------------------------------------------------------- */
@@ -321,12 +326,12 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--g
 }
 .auth-hero .hero-logo { display: flex; align-items: center; gap: 16px; }
 .auth-hero .hero-logo img { width: 72px; height: 72px; border-radius: 18px; box-shadow: 0 20px 50px -16px rgba(0,0,0,0.6); }
-.auth-hero .hero-logo .t { font-family: "DM Serif Display", serif; font-size: 30px; }
+.auth-hero .hero-logo .t { font-family: var(--font-head); font-size: 30px; }
 .auth-hero .hero-logo .t b { color: var(--gold-soft); font-weight: 400; }
 .auth-hero .hero-mid h2 { font-size: 40px; line-height: 1.1; margin-bottom: 14px; }
 .auth-hero .hero-mid p { max-width: 440px; color: #cfe0d6; font-size: 15px; }
 .auth-hero .hero-stats { display: flex; gap: 26px; margin-top: 26px; }
-.auth-hero .hero-stats div b { font-family: "DM Serif Display", serif; font-size: 30px; color: var(--gold-soft); display: block; }
+.auth-hero .hero-stats div b { font-family: var(--font-head); font-size: 30px; color: var(--gold-soft); display: block; }
 .auth-hero .hero-stats div span { font-size: 12px; color: #b9cabf; }
 .auth-hero .hero-foot { font-size: 12px; color: #9fb6aa; }
 
@@ -351,6 +356,51 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--g
   border: 1px dashed var(--border); font-size: 12px; color: var(--text-muted); }
 .demo-creds b { color: var(--text); }
 .demo-creds button { background: none; border: none; color: var(--gold); cursor: pointer; font-size: 12px; padding: 0; text-decoration: underline; }
+
+/* ---- AI Assistant (RAG chat) ----------------------------------------- */
+.assistant-fab {
+  position: fixed; right: 24px; bottom: 24px; z-index: 50;
+  width: 58px; height: 58px; border-radius: 50%; cursor: pointer; border: 1px solid var(--gold);
+  background: linear-gradient(135deg, var(--brand-2), var(--brand)); color: var(--gold-soft);
+  display: grid; place-items: center; box-shadow: 0 14px 30px -8px rgba(0,0,0,0.5);
+  transition: transform 0.15s;
+}
+.assistant-fab:hover { transform: translateY(-2px) scale(1.04); }
+.assistant-fab.hidden { display: none; }
+
+.assistant-panel {
+  position: fixed; right: 24px; bottom: 24px; z-index: 51;
+  width: min(390px, calc(100vw - 32px)); height: min(560px, calc(100vh - 48px));
+  display: flex; flex-direction: column; overflow: hidden;
+  background: var(--surface-solid); border: 1px solid var(--border); border-radius: 18px;
+  box-shadow: 0 26px 60px -18px rgba(0,0,0,0.6);
+}
+.assistant-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 14px; border-bottom: 1px solid var(--border-soft);
+  background: linear-gradient(135deg, var(--brand), var(--bg-1)); color: #f1ece1;
+}
+.ah-title { display: flex; align-items: center; gap: 8px; font-family: var(--font-head); font-size: 16px; }
+.ah-rag { font-size: 9px; font-weight: 700; letter-spacing: 1px; padding: 2px 6px; border-radius: 5px;
+  background: rgba(201,168,76,0.25); color: var(--gold-soft); }
+.assistant-head .icon-btn { width: 32px; height: 32px; background: rgba(255,255,255,0.1); border-color: transparent; color: #f1ece1; }
+
+.assistant-body { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+.bubble { max-width: 88%; padding: 10px 13px; border-radius: 14px; font-size: 13.5px; line-height: 1.5; }
+.bubble.bot { align-self: flex-start; background: var(--surface-2); color: var(--text); border: 1px solid var(--border-soft); border-bottom-left-radius: 4px; }
+.bubble.user { align-self: flex-end; background: var(--brand); color: #fff; border-bottom-right-radius: 4px; }
+.bubble-text { white-space: pre-wrap; }
+.bubble-src { margin-top: 6px; font-size: 10.5px; color: var(--text-muted); border-top: 1px dashed var(--border-soft); padding-top: 5px; }
+.bubble .typing { color: var(--text-muted); }
+
+.assistant-suggest { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 14px 10px; }
+.assistant-suggest button { font-size: 12px; padding: 7px 11px; border-radius: 999px; cursor: pointer;
+  background: var(--surface-2); border: 1px solid var(--border-soft); color: var(--text); min-height: 0; }
+.assistant-suggest button:hover { border-color: var(--gold); }
+
+.assistant-input { display: flex; gap: 8px; padding: 12px 14px; border-top: 1px solid var(--border-soft); }
+.assistant-input input { flex: 1; }
+.assistant-input .btn { padding: 0 14px; display: grid; place-items: center; }
 
 /* ---- Responsive ------------------------------------------------------- */
 @media (max-width: 980px) {

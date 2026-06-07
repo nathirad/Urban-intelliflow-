@@ -25,3 +25,4 @@ mnt/
 
 # Local agent/IDE tooling
 .claude/
+.gstack/

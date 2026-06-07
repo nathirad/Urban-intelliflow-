@@ -10,6 +10,7 @@ import CitizenEngagement from "./components/CitizenEngagement.jsx";
 import JunctionControl from "./components/JunctionControl.jsx";
 import RouteDemo from "./components/RouteDemo.jsx";
 import CountUp from "./components/CountUp.jsx";
+import AssistantChat from "./components/AssistantChat.jsx";
 import {
   IconMap, IconChart, IconControl, IconUsers, IconSun, IconMoon, IconLogout, IconBell,
 } from "./icons.jsx";
@@ -35,7 +36,8 @@ function Sidebar({ nav, active, setActive, role }) {
   return (
     <aside className="sidebar">
       <div className="brand">
-        <img src="/logo.svg" alt="Urban IntelliFlow" />
+        <img src="/logo.png" alt="Urban IntelliFlow"
+             onError={(e) => { if (!e.currentTarget.src.endsWith("/logo.svg")) e.currentTarget.src = "/logo.svg"; }} />
         <div>
           <div className="name">Urban <b>IntelliFlow</b></div>
           <div className="tag">Khon Kaen Smart Traffic</div>
@@ -137,6 +139,7 @@ function Dashboard() {
           </footer>
         </div>
       </div>
+      <AssistantChat />
     </div>
   );
 }

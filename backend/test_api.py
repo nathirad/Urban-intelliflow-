@@ -101,3 +101,14 @@ def test_auth_flow():
         assert reg.status_code == 200 and reg.json()["user"]["role"] == "citizen"
         assert c.post("/api/auth/register", json={"email": "fresh@x.com", "password": "secret1"}).status_code == 409
         assert c.post("/api/auth/register", json={"email": "bad", "password": "x"}).status_code == 400
+
+
+def test_assistant_rag():
+    with _client() as c:
+        r = c.post("/api/assistant", json={"query": "ระบบประหยัดงบยังไง"}).json()
+        assert r["grounded"] is True
+        assert len(r["answer"]) > 20
+        assert isinstance(r["sources"], list) and len(r["sources"]) >= 1
+        # live-state grounding: a real-time question should surface current numbers
+        live = c.post("/api/assistant", json={"query": "ตอนนี้แยกไหนรถติดสุด"}).json()
+        assert "แยก" in live["answer"]

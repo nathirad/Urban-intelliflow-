@@ -43,7 +43,8 @@ export default function AuthPage() {
     <div className="auth-wrap">
       <aside className="auth-hero">
         <div className="hero-logo">
-          <img src="/logo.svg" alt="Urban IntelliFlow" />
+          <img src="/logo.png" alt="Urban IntelliFlow"
+               onError={(e) => { if (!e.currentTarget.src.endsWith("/logo.svg")) e.currentTarget.src = "/logo.svg"; }} />
           <div className="t">Urban <b>IntelliFlow</b></div>
         </div>
         <div className="hero-mid">

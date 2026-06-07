@@ -124,7 +124,15 @@ GET  /api/business-value          Agent 4 economic/social metrics (see contract 
 POST /api/route                   Agent 3 route guidance — {"origin","destination"}
 POST /api/complaint               Agent 5 classify — {"text"?,"image_b64"?}
 GET  /api/citizen/stats           complaint donut + response KPIs
+POST /api/assistant               {query} → RAG answer grounded in docs + live state
 ```
+
+RAG assistant lives in `backend/rag.py` (lexical retrieval over docs/*.md + curated
+FAQ + live state; Gemini 1.5 Flash generation when `GEMINI_API_KEY` is set, else
+extractive). Auth in `backend/auth.py`. Frontend: theme + auth in
+`frontend/src/contexts.jsx`, chat in `components/AssistantChat.jsx`. Fonts: Space
+Grotesk (display) + IBM Plex Sans Thai (Thai UI). Logo: drop `frontend/public/logo.png`
+to override the SVG fallback.
 
 Shared live state lives in `backend/state.py` (in-memory for the demo; MongoDB +
 PostgreSQL/PostGIS in production). Smoke tests: `backend/test_api.py` (`pytest -q`).
