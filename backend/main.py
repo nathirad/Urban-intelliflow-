@@ -20,8 +20,10 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import RedirectResponse
 from pydantic import BaseModel
 
+import oauth
 import orchestrator
 from agents import business_value, feedback_classifier, route_guidance
 from auth import STORE, OAUTH_PROVIDERS, provider_configured
@@ -91,9 +93,35 @@ def login(body: LoginBody):
 
 @app.get("/api/auth/providers")
 def auth_providers():
-    """Which OAuth providers exist and whether each is configured for real OIDC."""
-    return {p: {"label": OAUTH_PROVIDERS[p]["label"], "configured": provider_configured(p)}
-            for p in OAUTH_PROVIDERS}
+    """Which OAuth providers exist and whether each is configured for real OIDC.
+    Real providers (line/facebook/google) need BOTH id+secret; others check id env."""
+    out = {}
+    for p in OAUTH_PROVIDERS:
+        configured = oauth.is_configured(p) if p in oauth.PROVIDER_CFG else provider_configured(p)
+        out[p] = {"label": OAUTH_PROVIDERS[p]["label"], "configured": configured}
+    return out
+
+
+@app.get("/api/auth/oauth/{provider}/login")
+def oauth_login(provider: str, audience: str = "citizen"):
+    """Real OAuth: redirect the browser to the provider's login page."""
+    if not oauth.is_configured(provider):
+        raise HTTPException(400, "provider ยังไม่ได้ตั้งค่า (ต้องมี client id + secret)")
+    return RedirectResponse(oauth.authorize_url(provider, audience))
+
+
+@app.get("/api/auth/oauth/{provider}/callback")
+async def oauth_callback(provider: str, code: str = "", state: str = "", error: str = ""):
+    """Provider redirects here after login → exchange code, sign in, bounce to frontend."""
+    if error or not code:
+        return RedirectResponse(f"{oauth.FRONTEND_URL}/?auth_error=1")
+    try:
+        prof = await oauth.exchange_and_profile(provider, code, state)
+        role = "officer" if provider == "sso" else prof["audience"]
+        res = STORE.oidc_login(prof["email"], prof["name"], role)
+        return RedirectResponse(f"{oauth.FRONTEND_URL}/?token={res['token']}")
+    except Exception:
+        return RedirectResponse(f"{oauth.FRONTEND_URL}/?auth_error=1")
 
 
 class SocialBody(BaseModel):

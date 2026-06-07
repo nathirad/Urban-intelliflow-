@@ -28,6 +28,13 @@ export function AuthProvider({ children }) {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
+    // Capture a token returned by a real OAuth callback redirect (?token=...).
+    const params = new URLSearchParams(window.location.search);
+    const cbToken = params.get("token");
+    if (cbToken) {
+      localStorage.setItem(TOKEN_KEY, cbToken);
+      window.history.replaceState({}, "", window.location.pathname);
+    }
     const t = localStorage.getItem(TOKEN_KEY);
     if (!t) { setReady(true); return; }
     getJSON("/api/auth/me")

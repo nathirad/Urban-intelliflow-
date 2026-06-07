@@ -45,18 +45,34 @@ export default function AuthPage() {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [providers, setProviders] = useState<Record<string, { configured: boolean }>>({});
+  const [pending, setPending] = useState<{ id: string; label: string; cls: string; Logo: any } | null>(null);
 
   useEffect(() => {
     getJSON("/api/auth/providers").then(setProviders).catch(() => {});
+    if (new URLSearchParams(window.location.search).get("auth_error")) {
+      setError("เข้าสู่ระบบผ่าน provider ไม่สำเร็จ");
+      window.history.replaceState({}, "", window.location.pathname);
+    }
   }, []);
 
-  const oauth = async (provider: string) => {
+  const oauth = (p: { id: string; label: string; cls: string; Logo: any }) => {
     setError("");
+    if (providers[p.id]?.configured) {
+      // Real OAuth: full-page redirect to the provider's actual login page.
+      window.location.href = `/api/auth/oauth/${p.id}/login?audience=${audience}`;
+      return;
+    }
+    setPending(p); // not configured → show a simulated consent screen
+  };
+
+  const consentAllow = async () => {
+    if (!pending) return;
     setBusy(true);
     try {
-      await social(provider, audience);
+      await social(pending.id, audience);
     } catch (err: any) {
       setError(err.message || "เข้าสู่ระบบไม่สำเร็จ");
+      setPending(null);
     } finally {
       setBusy(false);
     }
@@ -84,6 +100,42 @@ export default function AuthPage() {
   };
 
   const setPortal = (a: Audience) => { setAudience(a); setError(""); };
+
+  if (pending) {
+    const P = pending;
+    return (
+      <div className="oauth-consent">
+        <div className={`consent-card ${P.cls}`}>
+          <div className="consent-head">
+            <span className="consent-logo"><P.Logo size={30} /></span>
+            <div className="consent-provider">{P.label.replace(/^.*ด้วย\s*/, "").replace("ยืนยันตัวตนด้วย ", "")}</div>
+          </div>
+          <div className="consent-body">
+            <div className="consent-title">เข้าสู่ระบบ</div>
+            <p className="consent-app">
+              <b>Urban IntelliFlow</b> ขออนุญาตเข้าถึงข้อมูลโปรไฟล์ของคุณ
+              (ชื่อ และอีเมล) เพื่อสร้างบัญชีผู้ใช้
+            </p>
+            <div className="consent-account">
+              <div className="ca-avatar">{(P.label.match(/LINE|Facebook|Google|ThaiID/)?.[0] || "U")[0]}</div>
+              <div>
+                <b>บัญชี {P.label.match(/LINE|Facebook|Google|ThaiID/)?.[0]}</b>
+                <span>เดโม — ตัวอย่างบัญชีผู้ใช้</span>
+              </div>
+            </div>
+            <button className="btn consent-allow" disabled={busy} onClick={consentAllow}>
+              {busy ? "กำลังเข้าสู่ระบบ…" : "อนุญาตและดำเนินการต่อ"}
+            </button>
+            <button className="consent-cancel" disabled={busy} onClick={() => setPending(null)}>ยกเลิก</button>
+            <div className="consent-note">
+              🔒 หน้าจำลอง OAuth (เดโม) — ใน production จะ redirect ไปหน้า login จริงของ
+              {" "}{P.label.match(/LINE|Facebook|Google|ThaiID/)?.[0]} ผ่าน Keycloak OIDC
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="auth-wrap">
@@ -175,7 +227,7 @@ export default function AuthPage() {
           <div className="social-btns">
             {PROVIDERS[audience].map((p) => (
               <button key={p.id} type="button" className={`social-btn ${p.cls}`}
-                      disabled={busy} onClick={() => oauth(p.id)}>
+                      disabled={busy} onClick={() => oauth(p)}>
                 <span className="social-logo"><p.Logo size={18} /></span>
                 {p.label}
                 {providers[p.id] && !providers[p.id].configured && <span className="demo-tag">เดโม</span>}

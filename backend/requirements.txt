@@ -1,6 +1,7 @@
 fastapi>=0.110.0
 uvicorn[standard]>=0.29.0
 pydantic>=2.6.0
+httpx>=0.27.0   # OAuth token exchange + userinfo
 google-generativeai>=0.5.0   # Gemini 1.5 Flash (VLLM) for incident narration + complaint classification
 # Optional in production:
 # confluent-kafka>=2.3.0     # Kafka consumer

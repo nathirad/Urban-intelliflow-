@@ -123,6 +123,21 @@ class AuthStore:
         out["demo"] = not provider_configured(provider)
         return out
 
+    def oidc_login(self, email: str, name: str, role: str) -> dict:
+        """Create/login a user from a verified OAuth profile (real provider flow)."""
+        role = role if role in ROLES else "citizen"
+        if role == "admin":
+            role = "officer"
+        email = email.strip().lower()
+        with self._lock:
+            if email not in self.users:
+                self.users[email] = {
+                    "email": email, "name": name or email.split("@")[0], "role": role,
+                    "password": _hash_password(secrets.token_hex(8)),
+                    "created_at": datetime.now(timezone.utc).isoformat(),
+                }
+            return self._issue_token(email)
+
     def _issue_token(self, email: str) -> dict:
         token = secrets.token_urlsafe(24)
         self.tokens[token] = email
