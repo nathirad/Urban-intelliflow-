@@ -48,6 +48,9 @@ export function AuthProvider({ children }) {
   const register = (payload) =>
     postJSON("/api/auth/register", payload).then(finish);
 
+  const social = (provider: string, audience: string) =>
+    postJSON(`/api/auth/social/${provider}`, { audience }).then((r: any) => { finish(r); return r; });
+
   const logout = () => {
     postJSON("/api/auth/logout", {}).catch(() => {});
     localStorage.removeItem(TOKEN_KEY);
@@ -55,7 +58,7 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthCtx.Provider value={{ user, ready, login, register, logout }}>
+    <AuthCtx.Provider value={{ user, ready, login, register, social, logout }}>
       {children}
     </AuthCtx.Provider>
   );

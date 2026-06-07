@@ -358,6 +358,21 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--g
 .auth-switch a { color: var(--gold); cursor: pointer; font-weight: 600; }
 .auth-error { background: rgba(224,104,92,0.15); border: 1px solid var(--red); color: var(--red);
   padding: 9px 12px; border-radius: 10px; font-size: 13px; margin-bottom: 14px; }
+.social-divider { display: flex; align-items: center; gap: 10px; margin: 16px 0 12px; color: var(--text-muted); font-size: 12px; }
+.social-divider::before, .social-divider::after { content: ""; flex: 1; height: 1px; background: var(--border-soft); }
+.social-btns { display: flex; flex-direction: column; gap: 9px; }
+.social-btn { display: flex; align-items: center; justify-content: center; gap: 8px; position: relative;
+  min-height: 44px; padding: 11px 14px; border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 13.5px;
+  border: 1px solid var(--border); background: var(--surface-solid); color: var(--text); }
+.social-btn:hover { border-color: var(--gold); }
+.social-btn:disabled { opacity: 0.6; cursor: default; }
+.social-btn.line { background: #06C755; color: #fff; border-color: #06C755; }
+.social-btn.google { background: #fff; color: #1f2328; border-color: #dadce0; }
+.social-btn.thaiid { background: #2d4a8a; color: #fff; border-color: #2d4a8a; }
+.social-btn.sso { background: var(--brand); color: var(--gold-soft); border-color: var(--gold); }
+.demo-tag { position: absolute; right: 10px; font-size: 9px; font-weight: 700; letter-spacing: 0.5px;
+  padding: 2px 6px; border-radius: 5px; background: rgba(0,0,0,0.18); }
+.social-btn.google .demo-tag { background: rgba(0,0,0,0.08); color: #5f6368; }
 .demo-creds { margin-top: 18px; padding: 12px; border-radius: 10px; background: var(--surface-2);
   border: 1px dashed var(--border); font-size: 12px; color: var(--text-muted); }
 .demo-creds b { color: var(--text); }

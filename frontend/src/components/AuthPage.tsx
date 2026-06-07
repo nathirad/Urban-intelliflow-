@@ -1,8 +1,21 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuth, useTheme } from "../contexts";
+import { getJSON } from "../api";
 import { IconMoon, IconSun, IconUsers, IconCamera } from "../icons";
 
 type Audience = "citizen" | "officer";
+
+// Which providers each portal offers.
+const PROVIDERS: Record<Audience, { id: string; label: string; cls: string }[]> = {
+  citizen: [
+    { id: "line", label: "เข้าสู่ระบบด้วย LINE", cls: "line" },
+    { id: "google", label: "เข้าสู่ระบบด้วย Google", cls: "google" },
+    { id: "thaiid", label: "ยืนยันตัวตนด้วย ThaiID", cls: "thaiid" },
+  ],
+  officer: [
+    { id: "sso", label: "เข้าสู่ระบบด้วยบัญชีองค์กร (SSO)", cls: "sso" },
+  ],
+};
 
 const PORTAL: Record<Audience, { title: string; lead: string; demo: string; Icon: any }> = {
   citizen: {
@@ -20,7 +33,7 @@ const PORTAL: Record<Audience, { title: string; lead: string; demo: string; Icon
 };
 
 export default function AuthPage() {
-  const { login, register } = useAuth();
+  const { login, register, social } = useAuth();
   const { theme, toggle } = useTheme();
   const [audience, setAudience] = useState<Audience>("citizen");
   const [mode, setMode] = useState<"login" | "register">("login");
@@ -29,6 +42,23 @@ export default function AuthPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [providers, setProviders] = useState<Record<string, { configured: boolean }>>({});
+
+  useEffect(() => {
+    getJSON("/api/auth/providers").then(setProviders).catch(() => {});
+  }, []);
+
+  const oauth = async (provider: string) => {
+    setError("");
+    setBusy(true);
+    try {
+      await social(provider, audience);
+    } catch (err: any) {
+      setError(err.message || "เข้าสู่ระบบไม่สำเร็จ");
+    } finally {
+      setBusy(false);
+    }
+  };
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -133,6 +163,22 @@ export default function AuthPage() {
                 : mode === "login" ? `เข้าสู่ระบบ (${PORTAL[audience].title})` : "สมัครสมาชิก"}
             </button>
           </form>
+
+          <div className="social-divider"><span>หรือ</span></div>
+          <div className="social-btns">
+            {PROVIDERS[audience].map((p) => (
+              <button key={p.id} type="button" className={`social-btn ${p.cls}`}
+                      disabled={busy} onClick={() => oauth(p.id)}>
+                {p.label}
+                {providers[p.id] && !providers[p.id].configured && <span className="demo-tag">เดโม</span>}
+              </button>
+            ))}
+          </div>
+          {PROVIDERS[audience].some((p) => providers[p.id] && !providers[p.id].configured) && (
+            <div className="muted small" style={{ textAlign: "center", marginTop: 8 }}>
+              * โหมดเดโม — ยังไม่ได้เชื่อม provider จริง (production เชื่อม LINE/Google/ThaiID/SSO ผ่าน Keycloak OIDC)
+            </div>
+          )}
 
           <div className="auth-switch">
             {mode === "login" ? (

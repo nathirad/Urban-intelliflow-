@@ -103,6 +103,21 @@ def test_auth_flow():
         assert c.post("/api/auth/register", json={"email": "bad", "password": "x"}).status_code == 400
 
 
+def test_social_login():
+    with _client() as c:
+        provs = c.get("/api/auth/providers").json()
+        assert {"line", "google", "thaiid", "sso"} <= set(provs)
+        # LINE → citizen, demo flagged (no real OAuth configured)
+        line = c.post("/api/auth/social/line", json={"audience": "citizen"}).json()
+        assert line["user"]["role"] == "citizen" and line["demo"] is True and line["token"]
+        # SSO → officer regardless of audience
+        sso = c.post("/api/auth/social/sso", json={"audience": "citizen"}).json()
+        assert sso["user"]["role"] == "officer"
+        # token from social login authenticates
+        assert c.get("/api/auth/me", headers={"Authorization": f"Bearer {line['token']}"}).status_code == 200
+        assert c.post("/api/auth/social/nope", json={"audience": "citizen"}).status_code == 400
+
+
 def test_assistant_rag():
     with _client() as c:
         r = c.post("/api/assistant", json={"query": "ระบบประหยัดงบยังไง"}).json()

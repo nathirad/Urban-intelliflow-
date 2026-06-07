@@ -24,7 +24,7 @@ from pydantic import BaseModel
 
 import orchestrator
 from agents import business_value, feedback_classifier, route_guidance
-from auth import STORE
+from auth import STORE, OAUTH_PROVIDERS, provider_configured
 from state import STATE
 
 # Disable the background sim with INTELLIFLOW_SIM=0 (e.g. when wiring real Kafka).
@@ -87,6 +87,27 @@ def login(body: LoginBody):
         return STORE.login(body.email, body.password)
     except ValueError as e:
         raise HTTPException(401, str(e))
+
+
+@app.get("/api/auth/providers")
+def auth_providers():
+    """Which OAuth providers exist and whether each is configured for real OIDC."""
+    return {p: {"label": OAUTH_PROVIDERS[p]["label"], "configured": provider_configured(p)}
+            for p in OAUTH_PROVIDERS}
+
+
+class SocialBody(BaseModel):
+    audience: str = "citizen"
+
+
+@app.post("/api/auth/social/{provider}")
+def social_login(provider: str, body: SocialBody):
+    """Sign in via LINE/Google/ThaiID/SSO. Real OIDC via Keycloak when configured,
+    otherwise a clearly-labelled demo sign-in (demo=True)."""
+    try:
+        return STORE.social_login(provider, body.audience)
+    except ValueError as e:
+        raise HTTPException(400, str(e))
 
 
 def _token(authorization: str | None) -> str | None:

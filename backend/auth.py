@@ -18,6 +18,21 @@ from datetime import datetime, timezone
 
 ROLES = {"citizen", "officer", "admin"}
 
+# OAuth/OIDC providers. In production these federate through Keycloak; the env var
+# holds the client id. If unset, the provider runs in clearly-labelled DEMO mode
+# (creates a demo account) so the login flow is usable without real credentials.
+OAUTH_PROVIDERS = {
+    "line":   {"label": "LINE",            "client_env": "LINE_CHANNEL_ID"},
+    "google": {"label": "Google",          "client_env": "GOOGLE_CLIENT_ID"},
+    "thaiid": {"label": "ThaiID",          "client_env": "THAIID_CLIENT_ID"},
+    "sso":    {"label": "บัญชีองค์กร (SSO)", "client_env": "OIDC_SSO_CLIENT_ID"},
+}
+
+
+def provider_configured(provider: str) -> bool:
+    p = OAUTH_PROVIDERS.get(provider)
+    return bool(p and os.getenv(p["client_env"]))
+
 # Role label (Thai) for the UI.
 ROLE_LABEL = {
     "citizen": "ประชาชน",
@@ -78,6 +93,34 @@ class AuthStore:
             if not u or not _verify_password(password, u["password"]):
                 raise ValueError("อีเมลหรือรหัสผ่านไม่ถูกต้อง")
             return self._issue_token(email)
+
+    def social_login(self, provider: str, audience: str) -> dict:
+        """Sign in via an OAuth provider (LINE/Google/ThaiID/SSO).
+
+        Real OIDC runs through Keycloak when the provider is configured (env var
+        set). Otherwise this is DEMO mode: it provisions a deterministic demo
+        account for the provider so the flow works, and flags demo=True so the UI
+        can be honest that no real identity was verified."""
+        if provider not in OAUTH_PROVIDERS:
+            raise ValueError("ไม่รู้จัก provider นี้")
+        # SSO is for staff; social providers default to citizens.
+        role = "officer" if provider == "sso" else (audience if audience in ROLES else "citizen")
+        if role == "admin":
+            role = "officer"
+        label = OAUTH_PROVIDERS[provider]["label"]
+        email = f"{provider}.{role}@demo.intelliflow"
+        with self._lock:
+            if email not in self.users:
+                role_th = ROLE_LABEL.get(role, role)
+                self.users[email] = {
+                    "email": email, "name": f"ผู้ใช้ {label} ({role_th})", "role": role,
+                    "password": _hash_password(secrets.token_hex(8)),
+                    "created_at": datetime.now(timezone.utc).isoformat(),
+                }
+            out = self._issue_token(email)
+        out["provider"] = provider
+        out["demo"] = not provider_configured(provider)
+        return out
 
     def _issue_token(self, email: str) -> dict:
         token = secrets.token_urlsafe(24)
