@@ -329,3 +329,13 @@ def assistant(q: AssistantQuery):
     Uses Gemini 1.5 Flash when GEMINI_API_KEY is set, else an extractive answer."""
     import rag
     return rag.answer(q.query)
+
+
+# --- Serve the built React app (single-process web deploy) ------------------
+# Registered LAST so /api/* and /health take priority. In production build the
+# frontend (`npm run build`) → FastAPI serves frontend/dist at the same origin,
+# so one URL hosts the whole app (no CORS/proxy needed). In dev, Vite serves it.
+_DIST = os.path.join(os.path.dirname(os.path.dirname(__file__)), "frontend", "dist")
+if os.path.isdir(_DIST):
+    from fastapi.staticfiles import StaticFiles
+    app.mount("/", StaticFiles(directory=_DIST, html=True), name="spa")

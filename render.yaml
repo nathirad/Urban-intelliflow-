@@ -1,0 +1,16 @@
+# One-click deploy to Render (free tier). Render builds the Dockerfile and
+# injects $PORT. Push this repo, then "New + Blueprint" → pick this repo.
+# Works the same on Railway / Fly.io (point them at the Dockerfile).
+services:
+  - type: web
+    name: urban-intelliflow
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    envVars:
+      - key: INTELLIFLOW_SIM
+        value: "1"
+      # For real provider login, set these in the host dashboard (not here):
+      # GEMINI_API_KEY, LINE_CHANNEL_ID/SECRET, GOOGLE_CLIENT_ID/SECRET,
+      # FACEBOOK_APP_ID/SECRET, BACKEND_URL, FRONTEND_URL

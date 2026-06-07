@@ -63,6 +63,27 @@ cd edge && pip install -r requirements.txt
 python detector.py --source sample_traffic.mp4 --model yolo26n.pt --show
 ```
 
+## Deploy to the web (single image)
+
+The backend serves the built React app, so the whole thing runs as **one process
+on one URL** (no CORS/proxy). Build the frontend, then run the backend:
+
+```bash
+cd frontend && npm run build        # → frontend/dist
+cd ../backend && uvicorn main:app --host 0.0.0.0 --port 8000   # serves app + API
+```
+
+Or as a single container (host on Render / Railway / Fly.io / a VPS / self-host):
+
+```bash
+docker build -t urban-intelliflow .
+docker run -p 8000:8000 urban-intelliflow      # → http://localhost:8000
+```
+
+`render.yaml` is a one-click Render blueprint (Docker, free tier; injects `$PORT`).
+Set provider secrets (`GEMINI_API_KEY`, OAuth ids/secrets, `BACKEND_URL`,
+`FRONTEND_URL`) in the host dashboard to enable real Gemini + provider login.
+
 ## API (backend)
 
 `GET /api/summary` · `GET /api/junctions` · `GET /api/junctions/{id}` ·
