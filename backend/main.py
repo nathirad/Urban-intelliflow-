@@ -235,7 +235,10 @@ class RouteQuery(BaseModel):
 
 @app.post("/api/route")
 async def get_route(q: RouteQuery, authorization: str | None = Header(default=None)):
-    result = await route_guidance.run(q.model_dump())
+    try:
+        result = await route_guidance.run(q.model_dump())
+    except ValueError as e:
+        raise HTTPException(400, str(e))
     # PDPA: log the trip to the user's consented history (anonymized by email key).
     user = STORE.user_for_token(_token(authorization))
     if user:

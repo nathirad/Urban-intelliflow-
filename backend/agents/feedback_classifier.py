@@ -15,6 +15,15 @@ CATEGORIES = {
     "other": "City Hall General",
 }
 
+# Thai keywords checked before English fallbacks (UI prompts in Thai).
+_THAI_KEYWORDS: dict[str, tuple[str, ...]] = {
+    "flooding": ("น้ำท่วม", "ท่วม", "น้ำล้น"),
+    "pothole": ("ถนนชำรุด", "หลุม", "ชำรุด", "พัง"),
+    "signal_malfunction": ("สัญญาณไฟเสีย", "ไฟเสีย", "ไฟชำรุด", "ไฟดับ"),
+    "illegal_parking": ("จอดรถ", "จอดผิด", "จอดห้าม", "ฝ่าฝืน"),
+    "congestion": ("รถติด", "แน่น", "หนาแน่น"),
+}
+
 
 async def run(complaint: dict) -> dict:
     """complaint: {text?: str, image_b64?: str}"""
@@ -46,7 +55,10 @@ async def _classify(complaint: dict) -> str:
         return model.generate_content(parts).text.strip()
     """
     text = (complaint.get("text") or "").lower()
+    for cat, words in _THAI_KEYWORDS.items():
+        if any(w in text for w in words):
+            return cat
     for key in CATEGORIES:
-        if key.split("_")[0] in text:
+        if key.replace("_", " ") in text or key.split("_")[0] in text:
             return key
     return "other"

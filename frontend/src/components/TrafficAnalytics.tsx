@@ -23,7 +23,7 @@ export default function TrafficAnalytics() {
     <div className="card">
       <h2>วิเคราะห์การจราจร <span className="agent-tag">Spark</span></h2>
 
-      <div className="chart-title">ความหนาแน่นตามช่วงเวลา (Time-of-Day, UTC)</div>
+      <div className="chart-title">ความหนาแน่นตามช่วงเวลา (Time-of-Day, เวลาไทย UTC+7)</div>
       <ResponsiveContainer width="100%" height={170}>
         <AreaChart data={heatData} margin={{ top: 6, right: 10, bottom: 0, left: -12 }}>
           <defs>

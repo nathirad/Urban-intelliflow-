@@ -14,8 +14,9 @@ import heapq
 _GRAPH: dict[str, list[tuple[str, float]]] = {
     "MITR-01": [("MITR-02", 3), ("SRIC-01", 4)],
     "MITR-02": [("MITR-01", 3), ("PRAC-01", 5)],
-    "SRIC-01": [("MITR-01", 4), ("PRAC-01", 2)],
+    "SRIC-01": [("MITR-01", 4), ("PRAC-01", 2), ("LAKE-01", 4)],
     "PRAC-01": [("MITR-02", 5), ("SRIC-01", 2)],
+    "LAKE-01": [("SRIC-01", 4)],
 }
 
 # live congestion multiplier per junction (1.0 = free flow), fed by orchestrator
@@ -30,6 +31,8 @@ async def run(query: dict) -> dict:
     """query: {origin, destination}"""
     origin, dest = query["origin"], query["destination"]
     path, minutes = _dijkstra(origin, dest)
+    if path is None:
+        raise ValueError(f"ไม่พบเส้นทางจาก {origin} ไป {dest}")
     return {
         "agent": "route_guidance",
         "origin": origin,
@@ -41,6 +44,10 @@ async def run(query: dict) -> dict:
 
 
 def _dijkstra(start: str, goal: str):
+    if start == goal:
+        return [start], 0.0
+    if start not in _GRAPH and start != goal:
+        return None, None
     pq = [(0.0, start, [start])]
     best = {start: 0.0}
     while pq:
@@ -53,7 +60,7 @@ def _dijkstra(start: str, goal: str):
             if nc < best.get(nbr, float("inf")):
                 best[nbr] = nc
                 heapq.heappush(pq, (nc, nbr, path + [nbr]))
-    return [start], 0.0
+    return None, None
 
 
 def _avg_level(path: list[str]) -> str:

@@ -74,9 +74,18 @@ def test_route_and_complaint():
         assert route["waypoints"][-1] == "PRAC-01"
         assert route["estimated_minutes"] > 0
 
+        lake = c.post("/api/route", json={"origin": "MITR-01", "destination": "LAKE-01"}).json()
+        assert lake["waypoints"][-1] == "LAKE-01"
+        assert lake["estimated_minutes"] > 0
+
+        assert c.post("/api/route", json={"origin": "NOPE", "destination": "LAKE-01"}).status_code == 400
+
         comp = c.post("/api/complaint", json={"text": "มีน้ำท่วม flooding ที่ถนน"}).json()
         assert comp["category"] == "flooding"
         assert comp["priority"] == "high"
+
+        thai = c.post("/api/complaint", json={"text": "สัญญาณไฟเสียที่แยกศรีจันทร์"}).json()
+        assert thai["category"] == "signal_malfunction"
 
 
 def test_auth_flow():

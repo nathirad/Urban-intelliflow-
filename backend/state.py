@@ -29,6 +29,10 @@ JUNCTIONS_SEED = [
 
 ZONE_OF = {j["id"]: j["zone"] for j in JUNCTIONS_SEED}
 
+# Khon Kaen local time (UTC+7) for heatmap bucketing — matches orchestrator rush curve.
+def _local_hour() -> int:
+    return (datetime.now(timezone.utc).hour + 7) % 24
+
 # Edge-node connection lifecycle (honest: hardware is rolled out gradually).
 # Demo reality: a 2-junction pilot is live, 1 is mid-install, 2 are not deployed yet.
 NODE_STAGE = {
@@ -135,7 +139,7 @@ class _LiveState:
                 {"t": event["timestamp"], "score": event["congestion_score"],
                  "count": event["vehicle_count"]}
             )
-            hour = datetime.now(timezone.utc).hour
+            hour = _local_hour()
             acc = self.hourly[hour]
             acc[0] += event["congestion_score"]
             acc[1] += 1

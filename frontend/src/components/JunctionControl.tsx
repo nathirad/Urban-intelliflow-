@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { usePolling, postJSON } from "../api";
 import { congestionColor, congestionLabel } from "../theme";
 
@@ -6,18 +7,25 @@ import { congestionColor, congestionLabel } from "../theme";
 export default function JunctionControl() {
   const { data: junctions, refresh } = usePolling("/api/junctions", 2000, []);
   const { data: agents } = usePolling("/api/agents", 2500, []);
+  const [error, setError] = useState("");
 
   const toggle = async (j) => {
-    await postJSON(`/api/junctions/${j.id}/mode`, {
-      mode: j.mode === "auto" ? "manual" : "auto",
-    });
-    refresh();
+    setError("");
+    try {
+      await postJSON(`/api/junctions/${j.id}/mode`, {
+        mode: j.mode === "auto" ? "manual" : "auto",
+      });
+      refresh();
+    } catch (e) {
+      setError(e.message || "สลับโหมดไม่สำเร็จ");
+    }
   };
 
   return (
     <div className="ops-grid">
       <div className="card">
         <h2>ศูนย์ควบคุมสัญญาณไฟ <span className="agent-tag">Agent 1 · PLC</span></h2>
+        {error && <div className="auth-error" style={{ marginBottom: 12 }}>{error}</div>}
         <div className="junction-rows">
           {(junctions || []).map((j) => (
             <div className="junction-row" key={j.id}>

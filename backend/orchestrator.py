@@ -58,7 +58,8 @@ async def handle_event(event: dict, verbose: bool = False) -> None:
     ).isoformat()
 
     STATE.update_junction(event, timing)
-    mode = STATE.junctions[event["junction_id"]]["mode"]
+    j = STATE.junction(event["junction_id"])
+    mode = j["mode"] if j else "manual"
     STATE.log_agent(
         "signal_timing",
         f"{event['junction_id']} → เขียว {timing['green_seconds']}s "

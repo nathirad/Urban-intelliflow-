@@ -6,6 +6,7 @@ const JUNCTIONS = [
   ["MITR-02", "ถ.มิตรภาพ x ประชาสโมสร"],
   ["SRIC-01", "ถ.ศรีจันทร์ x กลางเมือง"],
   ["PRAC-01", "ถ.ประชาสโมสร x หน้า มข."],
+  ["LAKE-01", "บึงแก่นนคร"],
 ];
 const levelLabel = { low: "คล่องตัว", moderate: "ปานกลาง", high: "หนาแน่น" };
 
@@ -14,14 +15,17 @@ export default function RouteDemo() {
   const [origin, setOrigin] = useState("MITR-01");
   const [dest, setDest] = useState("PRAC-01");
   const [res, setRes] = useState(null);
+  const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
   const find = async () => {
     setBusy(true);
+    setError("");
     try {
       setRes(await postJSON("/api/route", { origin, destination: dest }));
-    } catch {
+    } catch (e) {
       setRes(null);
+      setError(e.message || "ค้นหาเส้นทางไม่สำเร็จ");
     } finally {
       setBusy(false);
     }
@@ -45,6 +49,8 @@ export default function RouteDemo() {
         </label>
         <button onClick={find} disabled={busy}>{busy ? "…" : "ค้นหาเส้นทาง"}</button>
       </div>
+
+      {error && <div className="auth-error" style={{ marginTop: 12 }}>{error}</div>}
 
       {res && (
         <div className="route-result">
